@@ -1,0 +1,15 @@
+.hero {
+    background: linear-gradient(to right, #ff7e5f, #feb47b);
+  }
+  
+  .store-container {
+    background-color: #f9f9f9;
+    min-height: 100vh;
+  }
+  
+  .card-img-top {
+    object-fit: cover;
+    height: 200px;
+    border-bottom: 1px solid #eee;
+  }
+  
