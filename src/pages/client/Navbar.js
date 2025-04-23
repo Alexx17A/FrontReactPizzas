@@ -4,7 +4,7 @@ const Navbar = () => {
     return (
         <nav className="navbar navbar-expand-lg navbar-light bg-light shadow-sm sticky-top">
             <div className="container">
-                <a className="navbar-brand fw-bold" href="#" style={{ fontFamily: "'Fredoka One', cursive" }}>
+                <a className="navbar-brand fw-bold" href="/tienda" style={{ fontFamily: "'Fredoka One', cursive" }}>
                     TAZ PIZZA
                 </a>
                 <button

@@ -10,6 +10,7 @@ import ProductDetail from './pages/client/ProductDetail';
 import Menu from './pages/client/Menu';
 import AuthForm from './pages/client/AuthForm';
 import Checkout from './pages/client/Checkout';
+import RegistroUsuarios from './pages/RegistroUsuarios';
 const App = () => {
   return (
     <Router>
@@ -25,6 +26,7 @@ const App = () => {
         <Route path="/menu" element={<Menu />} />
         <Route path="/auth" element={<AuthForm />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/Registro" element={<RegistroUsuarios />} />
       </Routes>
     </Router>
   );

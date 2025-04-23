@@ -3,6 +3,7 @@ import axios from "axios";
 import Navbar from "./Navbar";
 import Cart from "./Cart";
 import MenuItemCard from "./MenuItemCard";
+import "../../assets/css/Menu.css"; // Importa el nuevo CSS
 
 const Menu = () => {
   const [products, setProducts] = useState([]);
@@ -42,57 +43,42 @@ const Menu = () => {
   return (
     <>
       <Navbar />
-
-      <div
-        className="container my-4 position-sticky"
-        style={{ top: 0, zIndex: 1000 }}
-      >
-        <div className="bg-light p-3 rounded shadow">
-          <div className="row justify-content-center">
-            <div className="col-md-8">
-              <div className="d-flex align-items-center justify-content-center">
-                <label
-                  htmlFor="categoryFilter"
-                  className="me-3 fw-bold fs-5"
-                  style={{ fontFamily: "'Fredoka One', cursive" }}
-                >
-                  Filtrar por categoría:
-                </label>
-                <select
-                  id="categoryFilter"
-                  className="form-select form-select-lg w-50"
-                  onChange={(e) => setCategory(e.target.value)}
-                  value={category}
-                >
-                  <option value="all">Todos los productos</option>
-                  <option value="pizza">Pizzas</option>
-                  <option value="hotdog">Hot Dogs</option>
-                  <option value="hamburguesa">Hamburguesas</option>
-                  <option value="papas">Papas</option>
-                  <option value="bebidas">Bebidas</option>
-                  <option value="tacos">Tacos</option>
-                </select>
-              </div>
+      
+      <div className="menu-container">
+        <div className="container">
+          {/* Filtro de categorías */}
+          <div className="category-filter-container">
+            <div className="d-flex flex-column flex-md-row align-items-center justify-content-center">
+              <span className="filter-label">Filtrar por categoría:</span>
+              <select
+                className="category-select"
+                onChange={(e) => setCategory(e.target.value)}
+                value={category}
+              >
+                <option value="all">Todos los productos</option>
+                <option value="pizza">Pizzas</option>
+                <option value="hotdog">Hot Dogs</option>
+                <option value="hamburguesa">Hamburguesas</option>
+                <option value="papas">Papas</option>
+                <option value="bebidas">Bebidas</option>
+                <option value="tacos">Tacos</option>
+              </select>
             </div>
+          </div>
+          
+          {/* Título del menú */}
+          <div className="menu-header">
+            <h1 className="menu-title">Nuestro Menú</h1>
+          </div>
+          
+          {/* Grid de productos */}
+          <div className="menu-grid">
+            {filteredProducts.map((product) => (
+              <MenuItemCard key={product.id} product={product} />
+            ))}
           </div>
         </div>
       </div>
-
-      <section className="container my-5">
-        <h2
-          className="text-center mb-4 fw-bold text-danger"
-          style={{ fontFamily: "'Fredoka One', cursive", fontSize: "2.5rem" }}
-        >
-          🍕 Nuestro Menú 🍟
-        </h2>
-        <div className="row g-4" id="menuItemsContainer">
-          {filteredProducts.map((product) => (
-            <div key={product.id} className="col-md-4">
-              <MenuItemCard product={product} />
-            </div>
-          ))}
-        </div>
-      </section>
 
       <Cart />
     </>
