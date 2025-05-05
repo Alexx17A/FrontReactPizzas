@@ -22,9 +22,17 @@ const Cart = () => {
     const handleToggleCart = () => {
       setIsOpen(prev => !prev);
     };
+    
+    const handleCartUpdate = () => {
+      setCartItems(getCart());
+    };
+    
     window.addEventListener("toggleCart", handleToggleCart);
+    window.addEventListener("cartUpdated", handleCartUpdate);
+    
     return () => {
       window.removeEventListener("toggleCart", handleToggleCart);
+      window.removeEventListener("cartUpdated", handleCartUpdate);
     };
   }, []);
 

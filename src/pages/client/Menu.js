@@ -1,27 +1,28 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Navbar from "./Navbar";
-import Cart from "./Cart";
-import MenuItemCard from "./MenuItemCard";
-import "../../assets/css/Menu.css";
+import MenuUI from "./Menu.jsx";
 
 const Menu = () => {
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState("all");
   const [username, setUsername] = useState("");
-  const [page, setPage] = useState(0); // página actual
-  const [totalPages, setTotalPages] = useState(0); // total de páginas
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchProducts = (selectedCategory, pageNumber = 0) => {
     const token = localStorage.getItem("jwt_token");
     setUsername(localStorage.getItem("username") || "");
-
+  
     if (!token) {
       console.error("No hay JWT en localStorage");
       return;
     }
-
+  
+    setIsLoading(true);
+    setProducts([]);
+  
     let url = "";
     if (selectedCategory === "all") {
       url = `http://localhost:8080/api/public/products?sortBy=price&sortOrder=desc&pageSize=20&pageNumber=${pageNumber}`;
@@ -29,37 +30,40 @@ const Menu = () => {
       const categoryIds = {
         pizza: 1,
         hotdog: 2,
-        hamburguesa: 3,
+        bebidas: 3,
         papas: 4,
-        bebidas: 5,
+        hamburguesa: 5,
         tacos: 6,
       };
-
-      const categoryId = categoryIds[selectedCategory];
+  
+      const categoryId = categoryIds[selectedCategory.toLowerCase()];
       if (!categoryId) {
         console.error("Categoría no válida:", selectedCategory);
+        setIsLoading(false);
         return;
       }
       url = `http://localhost:8080/api/public/categories/${categoryId}/products?pageSize=20&pageNumber=${pageNumber}`;
     }
-
-    axios
-      .get(url, {
-        withCredentials: true,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        console.log("Productos recibidos:", res.data.content);
-        setProducts(res.data.content || []);
-        setTotalPages(res.data.totalPages || 1);
-      })
-      .catch((err) => {
-        console.error("No se pudo obtener el menú.", err);
-      });
+  
+    axios.get(url, {
+      withCredentials: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((res) => {
+      setProducts(res.data.content || []);
+      setTotalPages(res.data.totalPages || 1);
+    })
+    .catch((err) => {
+      console.error("No se pudo obtener el menú.", err);
+      setProducts([]);
+    })
+    .finally(() => {
+      setIsLoading(false);
+    });
   };
-
+  
   const fetchProductsByKeyword = (keyword) => {
     const token = localStorage.getItem("jwt_token");
 
@@ -68,33 +72,64 @@ const Menu = () => {
       return;
     }
 
+    setIsLoading(true);
+
     if (!keyword.trim()) {
-      // Si el campo está vacío, recargar la categoría actual
       fetchProducts(category, 0);
       return;
     }
 
-    axios
-      .get(
-        `http://localhost:8080/api/public/products/keyword/${keyword.trim()}`,
+    axios.get(
+      `http://localhost:8080/api/public/products/keyword/${keyword.trim()}`,
+      {
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+    .then((res) => {
+      setProducts(res.data || []);
+      setTotalPages(1);
+    })
+    .catch((err) => {
+      console.error("Error al buscar productos por keyword.", err);
+    })
+    .finally(() => {
+      setIsLoading(false);
+    });
+  };
+
+  const handleAddToCart = async (productId, quantity) => {
+    const token = localStorage.getItem("jwt_token");
+    
+    if (!token) {
+      console.error("No hay JWT en localStorage");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `http://localhost:8080/api/carts/products/${productId}/quantity/${quantity}`,
+        {},
         {
           withCredentials: true,
           headers: {
             Authorization: `Bearer ${token}`,
-          },
+            'Content-Type': 'application/json'
+          }
         }
-      )
-      .then((res) => {
-        console.log("Resultados de búsqueda:", res.data);
-        setProducts(res.data || []);
-        setTotalPages(1); // búsqueda simple, sin paginación por ahora
-      })
-      .catch((err) => {
-        console.error("Error al buscar productos por keyword.", err);
-      });
+      );
+
+      if (response.status === 201) {
+        console.log("Producto agregado al carrito");
+        window.dispatchEvent(new CustomEvent("cartUpdated"));
+      }
+    } catch (error) {
+      console.error("Error al agregar producto al carrito:", error);
+    }
   };
 
-  // Fetch inicial
   useEffect(() => {
     if (!searchTerm) {
       fetchProducts(category, page);
@@ -104,87 +139,34 @@ const Menu = () => {
   const handleCategoryChange = (e) => {
     const selectedCategory = e.target.value;
     setCategory(selectedCategory);
-    setPage(0); // Reinicia la paginación
-    setSearchTerm(""); // Limpiamos la búsqueda cuando cambias categoría
+    setPage(0);
+    setSearchTerm("");
   };
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
     if (value.trim() === "") {
-      fetchProducts(category, 0); // Si está vacío, volvemos a la categoría
+      fetchProducts(category, 0);
     } else {
       fetchProductsByKeyword(value);
     }
   };
 
   return (
-    <>
-      <Navbar />
-      <div className="menu-container">
-        <div className="container">
-          {username && (
-            <div className="user-greeting">
-              <h4>Bienvenido, {username} 👋</h4>
-            </div>
-          )}
-          {/* filtro */}
-          <div className="category-filter-container mb-3">
-            <select
-              className="category-select"
-              onChange={handleCategoryChange}
-              value={category}
-            >
-              <option value="all">Todos los productos</option>
-              <option value="pizza">Pizzas</option>
-              <option value="hotdog">Hot Dogs</option>
-              <option value="hamburguesa">Hamburguesas</option>
-              <option value="papas">Papas</option>
-              <option value="bebidas">Bebidas</option>
-              <option value="tacos">Tacos</option>
-            </select>
-          </div>
-
-          {/* search */}
-          <div className="search-box mb-4">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Buscar productos..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-          </div>
-
-          {/* grid */}
-          <div className="menu-grid">
-            {products.length > 0 ? (
-              products.map((p) => (
-                <MenuItemCard key={p.productId} product={p} />
-              ))
-            ) : (
-              <p>No hay productos disponibles.</p>
-            )}
-          </div>
-
-          {/* paginación */}
-          {searchTerm.trim() === "" && (
-            <div className="pagination">
-              {Array.from({ length: totalPages }, (_, index) => (
-                <button
-                  key={index}
-                  className={`page-button ${index === page ? "active" : ""}`}
-                  onClick={() => setPage(index)}
-                >
-                  {index + 1}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-      <Cart />
-    </>
+    <MenuUI
+      username={username}
+      category={category}
+      searchTerm={searchTerm}
+      products={products}
+      totalPages={totalPages}
+      page={page}
+      handleCategoryChange={handleCategoryChange}
+      handleSearchChange={handleSearchChange}
+      setPage={setPage}
+      onAddToCart={handleAddToCart}
+      isLoading={isLoading}
+    />
   );
 };
 
