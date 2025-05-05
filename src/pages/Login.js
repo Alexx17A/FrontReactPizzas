@@ -1,30 +1,58 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../assets/css/login.css'; // Archivo CSS para el estilo personalizado
+import '../assets/css/login.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import axios from 'axios';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // Inicializamos AOS para animaciones
   React.useEffect(() => {
     AOS.init({ duration: 1000 });
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
 
-    // Lógica de autenticación (esto es solo un ejemplo)
-    if (email === 'test@test.com' && password === '123456') {
-      // Aquí debería ir la lógica de autenticación con la API y manejo del JWT
-      localStorage.setItem('jwt_token', 'token_example'); // Guardar el token en localStorage
-      navigate('/home');  // Redirigir a la página de inicio
-    } else {
-      setError('Credenciales incorrectas');
+    try {
+      const response = await axios.post(
+        'http://localhost:8080/api/auth/signin',
+        { username, password },
+        { withCredentials: true }
+      );
+
+      // La respuesta trae al jwtToken en formato "CookieName=JWT; Path=..."
+      const raw = response.data.jwtToken;
+      // Extraemos sólo el JWT entre '=' y ';' PERO NO JALAAAAAA
+      const jwt = raw.substring(raw.indexOf('=') + 1, raw.indexOf(';'));
+
+      const roles = response.data.roles;
+
+      if (jwt) {
+        // Guardamos el JWT puro 
+        localStorage.setItem('jwt_token', jwt);
+        localStorage.setItem('username', response.data.username);
+
+        if (roles.includes('ROLE_ADMIN')) {
+          localStorage.setItem('userRole', 'ROLE_ADMIN');
+          navigate('/home');
+        } else if (roles.includes('ROLE_USER')) {
+          localStorage.setItem('userRole', 'ROLE_USER');
+          navigate('/tienda');
+        } else {
+          setError('No tienes un rol válido asignado.');
+        }
+      } else {
+        setError('Error: Token no recibido');
+      }
+    } catch (err) {
+      console.error('Error en login:', err);
+      setError(err.response?.data?.message || 'Credenciales incorrectas o error del servidor');
     }
   };
 
@@ -36,23 +64,25 @@ const Login = () => {
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              placeholder="Nombre de usuario"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
           </div>
           <div className="input-group">
             <input
               type="password"
-              placeholder="Password"
+              placeholder="Contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
-          <button type="submit" className="login-btn">Iniciar sesión</button>
+          <button type="submit" className="login-btn">
+            Iniciar sesión
+          </button>
         </form>
         <p className="signup-link">
           ¿No tienes cuenta? <a href="/registro">Regístrate aquí</a>

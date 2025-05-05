@@ -1,43 +1,46 @@
-import React from "react";
-import "../../assets/css/MenuItemCard.css";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 const MenuItemCard = ({ product }) => {
-    // Función para obtener emoji según categoría
-    const getCategoryEmoji = (category) => {
-        switch(category) {
-            case 'pizza': return '🍕';
-            case 'hotdog': return '🌭';
-            case 'hamburguesa': return '🍔';
-            case 'papas': return '🍟';
-            case 'bebidas': return '🥤';
-            case 'tacos': return '🌮';
-            default: return '🍽';
-        }
+  
+  const getCategoryImage = (category) => {
+    const images = {
+      pizza: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
+      hotdog: 'https://images.unsplash.com/photo-1619740455993-9e612b1af08a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
+      hamburguesa: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
+      papas: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
+      bebidas: 'https://images.unsplash.com/photo-1554866585-cd94860890b7?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
+      tacos: 'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80'
     };
+    return images[category] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80';
+  };
 
-    return (
-        <div className="card h-100 shadow-sm border-0 rounded-4 menu-item-card">
-            {/* Imagen del producto (puedes reemplazar con una imagen real) */}
-            <div className="card-img-top">
-                {product.nombre.charAt(0)}
-            </div>
-            
-            <div className="card-body d-flex flex-column justify-content-between">
-                <div>
-                    <h5 className="card-title text-primary fw-bold">{product.nombre}</h5>
-                    <p className="text-muted text-capitalize mb-2">
-                        {getCategoryEmoji(product.tipo)} {product.tipo}
-                    </p>
-                </div>
-                <div>
-                    <p className="fw-bold text-success fs-5 mb-3">${product.precio}</p>
-                    <button className="btn btn-warning w-100 fw-bold">
-                        Agregar al carrito
-                    </button>
-                </div>
-            </div>
+  const imageUrl = product.imagen || getCategoryImage(product.tipo);
+
+  return (
+    <div className="menu-item-card">
+      <img
+        src={imageUrl}
+        className="card-img-top"
+        alt={product.nombre}
+      />
+      <div className="card-body">
+        <h5 className="card-title">{product.nombre}</h5>
+        <p className="card-text">${product.precio}</p>
+        <div className="d-flex justify-content-between gap-2">
+          <button className="btn btn-outline-dark flex-grow-1">
+            Agregar
+          </button>
+          <Link
+            to={`/producto/${product.id}`}
+            className="btn btn-dark flex-grow-1"
+          >
+            Ver más
+          </Link>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default MenuItemCard;

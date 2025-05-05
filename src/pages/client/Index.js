@@ -9,6 +9,8 @@ import { Link } from 'react-router-dom';
 const StoreHome = () => {
   const [products, setProducts] = useState([]);
   const [scrolled, setScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
 
   const dummyData = [
     {
@@ -28,12 +30,30 @@ const StoreHome = () => {
       nombre: 'Pizza Mexicana',
       precio: 170,
       imagen: 'https://www.lapizzaloca.com/wp-content/uploads/2023/10/la-mexicana.png'
+    },
+    {
+      id: 4,
+      nombre: 'Pizza Supreme',
+      precio: 150,
+      imagen: 'https://www.lapizzaloca.com/wp-content/uploads/2023/10/Supreme.png'
+    },
+    {
+      id: 5,
+      nombre: 'Pizza Vegetariana',
+      precio: 160,
+      imagen: 'https://www.lapizzaloca.com/wp-content/uploads/2023/10/vegetarian.png'
+    },
+    {
+      id: 6,
+      nombre: 'Pizza de queso',
+      precio: 170,
+      imagen: 'https://www.lapizzaloca.com/wp-content/uploads/2024/02/large-cheese-only.png'
     }
   ];
 
   useEffect(() => {
     AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
-    
+
     const handleScroll = () => {
       if (window.scrollY > 10) {
         setScrolled(true);
@@ -41,9 +61,18 @@ const StoreHome = () => {
         setScrolled(false);
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
-    
+
+    // 👇 Verificamos si está logueado
+    const token = localStorage.getItem('jwt_token');
+    const storedUsername = localStorage.getItem('username');
+
+    if (token && storedUsername) {
+      setIsLoggedIn(true);
+      setUsername(storedUsername);
+    }
+
     axios.get('http://localhost:8000/api/products')
       .then(res => {
         if (Array.isArray(res.data) && res.data.length > 0) {
@@ -55,9 +84,18 @@ const StoreHome = () => {
       .catch(() => {
         setProducts(dummyData);
       });
-      
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // 👇 Handler para cerrar sesión
+  const handleLogout = () => {
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('username');
+    setIsLoggedIn(false);
+    setUsername('');
+    window.location.reload();  // 🔄 Refresca para aplicar los cambios
+  };
 
   return (
     <div className="store-container bg-light">
@@ -88,13 +126,24 @@ const StoreHome = () => {
               </li>
             </ul>
 
-            <div className="d-flex" data-aos="fade-left">
-              <Link to="/Registro" className="btn btn-outline-light me-2 register-btn">
-                Registrarse
-              </Link>
-              <Link to="/login" className="btn btn-danger login-btn">
-                Iniciar Sesión
-              </Link>
+            <div className="d-flex align-items-center" data-aos="fade-left">
+              {isLoggedIn ? (
+                <>
+                  <span className="text-white me-3">👋 Hola, {username}</span>
+                  <button onClick={handleLogout} className="btn btn-warning">
+                    Cerrar sesión
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/Registro" className="btn btn-outline-light me-2 register-btn">
+                    Registrarse
+                  </Link>
+                  <Link to="/login" className="btn btn-danger login-btn">
+                    Iniciar Sesión
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

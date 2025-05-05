@@ -11,11 +11,13 @@ import Menu from './pages/client/Menu';
 import AuthForm from './pages/client/AuthForm';
 import Checkout from './pages/client/Checkout';
 import RegistroUsuarios from './pages/RegistroUsuarios';
+import SobreNosotros from './pages/SobreNosotros'; 
+import ProtectedRoute from './components/ProtectedRoute';
+
 const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/pedidos" element={<Pedidos />} />
@@ -27,6 +29,16 @@ const App = () => {
         <Route path="/auth" element={<AuthForm />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/Registro" element={<RegistroUsuarios />} />
+        <Route path="/about" element={<SobreNosotros />} /> 
+
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
+              <Home />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );
