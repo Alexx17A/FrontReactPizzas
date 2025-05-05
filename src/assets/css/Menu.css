@@ -213,3 +213,10 @@
   color: white;
   border-color: #007bff;
 }
+
+.highlight-card {
+  border: 2px solid #007bff !important;
+  box-shadow: 0 0 15px rgba(0, 123, 255, 0.4);
+}
+
+/*Pasar esto despues a un css para el carrito me da weba*/

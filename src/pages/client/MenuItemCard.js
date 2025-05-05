@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const MenuItemCard = ({ product }) => {
+const MenuItemCard = ({ product, onAddToCart }) => {
   const getCategoryImage = (category) => {
     const images = {
       pizza: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
@@ -24,18 +24,30 @@ const MenuItemCard = ({ product }) => {
     <span>${product.price}</span>
   );
 
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    if (onAddToCart) {
+      onAddToCart(product.productId, 1);
+    }
+  };
+
   return (
-    <div className="menu-item-card">
+    <div className="card h-100">
       <img
         src={imageUrl}
         className="card-img-top"
         alt={product.productName}
+        style={{ height: '200px', objectFit: 'cover' }}
       />
-      <div className="card-body">
+      <div className="card-body d-flex flex-column">
         <h5 className="card-title">{product.productName}</h5>
-        <p className="card-text">{displayPrice}</p>
+        <p className="card-text">{product.description || 'Delicioso producto'}</p>
+        <p className="card-text mt-auto">{displayPrice}</p>
         <div className="d-flex justify-content-between gap-2">
-          <button className="btn btn-outline-dark flex-grow-1">
+          <button 
+            className="btn btn-outline-dark flex-grow-1"
+            onClick={handleAddToCart}
+          >
             Agregar
           </button>
           <Link
