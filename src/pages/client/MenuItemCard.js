@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const MenuItemCard = ({ product }) => {
-  
   const getCategoryImage = (category) => {
     const images = {
       pizza: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
@@ -15,24 +14,32 @@ const MenuItemCard = ({ product }) => {
     return images[category] || 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80';
   };
 
-  const imageUrl = product.imagen || getCategoryImage(product.tipo);
+  const imageUrl = product.image || getCategoryImage(product.tipo);
+  const displayPrice = product.specialPrice ? (
+    <>
+      <span className="text-muted text-decoration-line-through">${product.price}</span>{' '}
+      <span>${product.specialPrice}</span>
+    </>
+  ) : (
+    <span>${product.price}</span>
+  );
 
   return (
     <div className="menu-item-card">
       <img
         src={imageUrl}
         className="card-img-top"
-        alt={product.nombre}
+        alt={product.productName}
       />
       <div className="card-body">
-        <h5 className="card-title">{product.nombre}</h5>
-        <p className="card-text">${product.precio}</p>
+        <h5 className="card-title">{product.productName}</h5>
+        <p className="card-text">{displayPrice}</p>
         <div className="d-flex justify-content-between gap-2">
           <button className="btn btn-outline-dark flex-grow-1">
             Agregar
           </button>
           <Link
-            to={`/producto/${product.id}`}
+            to={`/producto/${product.productId}`}
             className="btn btn-dark flex-grow-1"
           >
             Ver más
