@@ -12,7 +12,6 @@ const RegistroUsuarios = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    telefono: ''
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,7 +48,6 @@ const RegistroUsuarios = () => {
     if (!emailRegex.test(formData.email)) newErrors.email = 'Email inválido';
     if (formData.password.length < 6) newErrors.password = 'Mínimo 6 caracteres';
     if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Las contraseñas no coinciden';
-    if (!formData.telefono.match(/^\d{10}$/)) newErrors.telefono = 'Teléfono debe tener 10 dígitos';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -63,11 +61,11 @@ const RegistroUsuarios = () => {
     
     try {
       // Conexión con tu backend
-      const response = await axios.post('http://tu-api.com/auth/registro', {
-        nombre: formData.nombre,
+      const response = await axios.post('http://localhost:8080/api/auth/signup', {
+        username: formData.nombre,
         email: formData.email,
         password: formData.password,
-        telefono: formData.telefono
+       // telefono: formData.telefono pense que ibamos a ocupar el telefono XD pero ya vi que no
       });
 
       // Guardar token en localStorage
@@ -104,7 +102,7 @@ const RegistroUsuarios = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="registro-form">
-            <div className={`input-group ${errors.nombre ? 'error' : ''}`} data-aos="fade-up" data-aos-delay="250">
+          <div className={`input-group ${errors.nombre ? 'error' : ''}`} data-aos="fade-up" data-aos-delay="250">
               <input
                 type="text"
                 name="nombre"
@@ -126,18 +124,6 @@ const RegistroUsuarios = () => {
                 required
               />
               {errors.email && <span className="error-msg">{errors.email}</span>}
-            </div>
-
-            <div className={`input-group ${errors.telefono ? 'error' : ''}`} data-aos="fade-up" data-aos-delay="350">
-              <input
-                type="tel"
-                name="telefono"
-                value={formData.telefono}
-                onChange={handleChange}
-                placeholder="Teléfono (10 dígitos)"
-                required
-              />
-              {errors.telefono && <span className="error-msg">{errors.telefono}</span>}
             </div>
 
             <div className={`input-group ${errors.password ? 'error' : ''}`} data-aos="fade-up" data-aos-delay="400">
