@@ -11,6 +11,8 @@ const Cart = ({
   handleAdd,
   totalPrice,
 }) => {
+  const safeCartItems = cartItems || [];  // 👈 aseguramos array siempre
+
   return (
     <div
       className={`cart-overlay ${isOpen ? "open" : ""}`}
@@ -21,11 +23,11 @@ const Cart = ({
           ×
         </button>
         <h2>Tu Carrito</h2>
-        {cartItems.length === 0 ? (
+        {safeCartItems.length === 0 ? (
           <p>El carrito está vacío.</p>
         ) : (
           <ul>
-            {cartItems.map((item) => (
+            {safeCartItems.map((item) => (
               <li key={item.id}>
                 <span>{item.name}</span>
                 <div>

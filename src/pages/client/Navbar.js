@@ -64,12 +64,12 @@ const Navbar = () => {
                 <Link className="nav-link" to="/admin">Panel Admin</Link>
               </li>
             )}
-            <li className="nav-item d-flex align-items-center">
+            <li className="">
               <button
-                className="btn btn-outline-primary ms-3"
+                className="bs-3"
                 onClick={toggleCart}
               >
-                🛒 Carrito
+                🛒 Carr
               </button>
             </li>
             <li className="nav-item d-flex align-items-center">

@@ -13,7 +13,14 @@
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1040;
+  opacity: 0;
+  pointer-events: none; /* Oculto por defecto */
   transition: opacity 0.3s ease;
+}
+
+.cart-overlay.open {
+  opacity: 1;
+  pointer-events: auto; /* ✅ Visible y clickeable */
 }
 
 /* Contenedor principal del carrito */
@@ -32,9 +39,9 @@
   flex-direction: column;
 }
 
-/* Cuando el carrito está abierto */
 .cart-container.open {
   right: 0;
+  animation: slideIn 0.3s forwards;
 }
 
 /* Cabecera del carrito */
@@ -136,7 +143,6 @@
   cursor: pointer;
 }
 
-/* Mostrar botón flotante solo en móviles */
 @media (max-width: 768px) {
   .cart-mobile-button {
     display: flex;
@@ -149,17 +155,4 @@
 @keyframes slideIn {
   from { right: -400px; }
   to { right: 0; }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.cart-container.open {
-  animation: slideIn 0.3s forwards;
-}
-
-.cart-overlay {
-  animation: fadeIn 0.3s forwards;
 }

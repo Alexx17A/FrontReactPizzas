@@ -1,5 +1,6 @@
 import React from 'react';
 import MenuItemCard from './MenuItemCard';
+import CartContainer from './Cart.js'; // 
 
 const MenuUI = ({
   username,
@@ -14,10 +15,25 @@ const MenuUI = ({
   onAddToCart,
   isLoading
 }) => {
+
+  const handleCartClick = () => {
+    window.dispatchEvent(new CustomEvent("toggleCart"));
+  };
+
   return (
     <div className="container py-4">
-      <h2 className="mb-4">Menú</h2>
-      
+      {/* Encabezado con botón del carrito */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Menú</h2>
+        <button 
+          className="btn btn-primary d-flex align-items-center gap-2"
+          onClick={handleCartClick}
+        >
+          🛒 Carrito
+        </button>
+      </div>
+
+      {/* Filtros */}
       <div className="row mb-4">
         <div className="col-md-6">
           <select 
@@ -45,6 +61,7 @@ const MenuUI = ({
         </div>
       </div>
 
+      {/* Productos */}
       {isLoading ? (
         <div className="text-center py-5">
           <div className="spinner-border text-primary" role="status">
@@ -92,6 +109,9 @@ const MenuUI = ({
           )}
         </>
       )}
+
+      {/* Carrito modal */}
+      <CartContainer />
     </div>
   );
 };

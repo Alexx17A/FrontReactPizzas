@@ -6,7 +6,7 @@ import {
   removeFromCart,
   decreaseQuantity,
 } from "../../components/cartService";
-import Cart from "./Cart";
+import Cart from "./Cart.jsx";
 
 const CartContainer = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,7 +14,8 @@ const CartContainer = () => {
 
   useEffect(() => {
     if (isOpen) {
-      setCartItems(getCart());
+      const cart = getCart();
+      setCartItems(cart || []);  // 👈 aseguramos array
     }
   }, [isOpen]);
 
@@ -24,7 +25,8 @@ const CartContainer = () => {
     };
 
     const handleCartUpdate = () => {
-      setCartItems(getCart());
+      const cart = getCart();
+      setCartItems(cart || []);  // 👈 aseguramos array
     };
 
     window.addEventListener("toggleCart", handleToggleCart);
@@ -46,20 +48,23 @@ const CartContainer = () => {
 
   const handleRemove = (productId) => {
     removeFromCart(productId);
-    setCartItems(getCart());
+    const cart = getCart();
+    setCartItems(cart || []);  // 👈 aseguramos array
   };
 
   const handleDecrease = (productId) => {
     decreaseQuantity(productId);
-    setCartItems(getCart());
+    const cart = getCart();
+    setCartItems(cart || []);  // 👈 aseguramos array
   };
 
   const handleAdd = (product) => {
     addToCart(product);
-    setCartItems(getCart());
+    const cart = getCart();
+    setCartItems(cart || []);  // 👈 aseguramos array
   };
 
-  const totalPrice = cartItems.reduce(
+  const totalPrice = (cartItems || []).reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
