@@ -1,28 +1,18 @@
 import axios from 'axios';
 
-// Crear una instancia de axios para configurar los headers
 const api = axios.create({
-  baseURL: 'TU HOST AQUI',  // Cambia por tu URL de la API
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: 'http://localhost:8080/api',
+  withCredentials: true, // This is crucial for cookies
 });
 
-// Función para obtener el token desde el localStorage
-const getToken = () => {
-  return localStorage.getItem('jwt_token');
-};
-
-// Interceptor para añadir el JWT a las cabeceras de las peticiones
-api.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+// Remove manual token handling - we'll use cookies only
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('jwt_token');
+      window.location.href = '/login';
     }
-    return config;
-  },
-  (error) => {
     return Promise.reject(error);
   }
 );

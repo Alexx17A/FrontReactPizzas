@@ -1,30 +1,46 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../assets/css/login.css'; // Archivo CSS para el estilo personalizado
+import '../assets/css/login.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import api from '../services/api';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Inicializamos AOS para animaciones
   React.useEffect(() => {
     AOS.init({ duration: 1000 });
+    console.log('Login component mounted');
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Lógica de autenticación (esto es solo un ejemplo)
-    if (email === 'test@test.com' && password === '123456') {
-      // Aquí debería ir la lógica de autenticación con la API y manejo del JWT
-      localStorage.setItem('jwt_token', 'token_example'); // Guardar el token en localStorage
-      navigate('/home');  // Redirigir a la página de inicio
-    } else {
-      setError('Credenciales incorrectas');
+    setLoading(true);
+    setError('');
+  
+    try {
+      const response = await api.post('/auth/signin', {
+        username,
+        password
+      });
+  
+      console.log('Login successful:', response.data);
+      
+      // Check admin status from response
+      const isAdmin = response.data.roles.includes('ROLE_ADMIN');
+      console.log('User roles:', response.data.roles);
+  
+      navigate(isAdmin ? '/admin' : '/home');
+  
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Invalid credentials');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -36,11 +52,12 @@ const Login = () => {
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
           <div className="input-group">
@@ -50,9 +67,16 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
-          <button type="submit" className="login-btn">Iniciar sesión</button>
+          <button 
+            type="submit" 
+            className="login-btn"
+            disabled={loading}
+          >
+            {loading ? 'Verificando...' : 'Iniciar sesión'}
+          </button>
         </form>
         <p className="signup-link">
           ¿No tienes cuenta? <a href="/registro">Regístrate aquí</a>
