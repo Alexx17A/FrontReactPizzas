@@ -34,19 +34,19 @@ const Cart = ({
             <p>El carrito está vacío.</p>
           ) : (
             safeCartItems.map(item => (
-              <div className="cart-item" key={item.id}>
+              <div className="cart-item" key={item.productId}>
                 <div className="cart-item-image">
-                  {item.image && <img src={item.image} alt={item.name} />}
+                  {item.image && <img src={item.image} alt={item.productName} />}
                 </div>
                 <div className="cart-item-details">
-                  <h6>{item.name}</h6>
-                  <p>Precio: ${item.price}</p>
+                  <h6>{item.productName}</h6>
+                  <p>Precio: ${item.specialPrice ?? item.price}</p>
                   <p>Cantidad: {item.quantity}</p>
                 </div>
                 <div className="cart-item-actions">
-                  <button onClick={() => handleDecrease(item.id)}>-</button>
-                  <button onClick={() => handleAdd(item)}>+</button>
-                  <button onClick={() => handleRemove(item.id)}>Eliminar</button>
+                  <button onClick={() => handleDecrease(item.productId)}>-</button>
+                  <button onClick={() => handleAdd(item.productId)}>+</button>
+                  <button onClick={() => handleRemove(item.productId)}>×</button>
                 </div>
               </div>
             ))

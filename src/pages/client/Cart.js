@@ -5,55 +5,67 @@ import Cart from "./Cart.jsx";
 
 const CartContainer = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [cartId, setCartId] = useState(null);
   const [cartItems, setCartItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
+  // Fetch the current user's cart
   const fetchCart = async () => {
     const token = localStorage.getItem("jwt_token");
     if (!token) return;
+    
+    setIsLoading(true);
     try {
-      const res = await axios.get(
+      const response = await axios.get(
         "http://localhost:8080/api/carts/users/cart",
         {
           withCredentials: true,
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      // tu API devuelve { cartId, totalPrice, products: [...] }
-      setCartItems(res.data.products || []);
-      setTotalPrice(res.data.totalPrice ?? 0);
-    } catch (err) {
-      console.error("No se pudo cargar el carrito", err);
+      const data = response.data;
+      setCartId(data.cartId);
+      setCartItems(data.products || []);
+      setTotalPrice(data.totalPrice ?? 0);
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      setCartItems([]);
+      setTotalPrice(0);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Al abrir el modal, cargo el carrito
   useEffect(() => {
     if (isOpen) fetchCart();
   }, [isOpen]);
 
-  // Escucho eventos para refrescar
+  // Listen for global cart toggle and updates
   useEffect(() => {
-    const onToggle = () => setIsOpen((o) => !o);
-    const onUpdate = () => {
+    const handleToggleCart = () => setIsOpen(prev => !prev);
+    const handleCartUpdate = () => {
       if (isOpen) fetchCart();
     };
-    window.addEventListener("toggleCart", onToggle);
-    window.addEventListener("cartUpdated", onUpdate);
+
+    window.addEventListener("toggleCart", handleToggleCart);
+    window.addEventListener("cartUpdated", handleCartUpdate);
     return () => {
-      window.removeEventListener("toggleCart", onToggle);
-      window.removeEventListener("cartUpdated", onUpdate);
+      window.removeEventListener("toggleCart", handleToggleCart);
+      window.removeEventListener("cartUpdated", handleCartUpdate);
     };
   }, [isOpen]);
 
-  const toggleCart = () => setIsOpen((o) => !o);
-  const handleOutsideClick = (e) =>
+  const toggleCart = () => setIsOpen(prev => !prev);
+  const handleOutsideClick = e =>
     e.target.classList.contains("cart-overlay") && toggleCart();
 
-  // Las acciones de +, - y eliminar lanzan un evento global para refrescar
+  // Generic method to call cart mutate endpoints and refresh state
   const mutateCart = async (method, url) => {
     const token = localStorage.getItem("jwt_token");
     if (!token) return;
+    
+    setIsLoading(true);
     try {
       await axios({
         method,
@@ -61,21 +73,44 @@ const CartContainer = () => {
         withCredentials: true,
         headers: { Authorization: `Bearer ${token}` },
       });
-      window.dispatchEvent(new CustomEvent("cartUpdated"));
+      // After mutation, re-fetch the cart so UI updates
+      await fetchCart();
     } catch (err) {
-      console.error("Error mutando carrito", err);
+      console.error("Error mutating cart", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleRemove = (id) =>
-    mutateCart(
+  // Remove entire product from cart
+  const handleRemove = async productId => {
+    if (!cartId || isLoading) return;
+    console.log(`Removing product ${productId} from cart ${cartId}`);
+    await mutateCart(
       "delete",
-      `http://localhost:8080/api/carts/products/${id}/quantity/delete`
+      `http://localhost:8080/api/carts/${cartId}/product/${productId}`
     );
-  const handleDecrease = (id) =>
-    mutateCart("post", `http://localhost:8080/api/carts/products/${id}/quantity/dec`);
-  const handleAdd = (item) =>
-    mutateCart("post", `http://localhost:8080/api/carts/products/${item.productId}/quantity/1`);
+  };
+
+  // Decrease quantity by 1
+  const handleDecrease = async productId => {
+    if (!cartId || isLoading) return;
+    console.log(`Decreasing quantity for product ${productId} in cart ${cartId}`);
+    await mutateCart(
+      "put",
+      `http://localhost:8080/api/carts/${cartId}/product/${productId}/quantity/delete`
+    );
+  };
+
+  // Increase quantity by 1
+  const handleAdd = async productId => {
+    if (!cartId || isLoading) return;
+    console.log(`Adding quantity for product ${productId} in cart ${cartId}`);
+    await mutateCart(
+      "post",
+      `http://localhost:8080/api/carts/${cartId}/product/${productId}/quantity/1`
+    );
+  };
 
   return (
     <Cart
