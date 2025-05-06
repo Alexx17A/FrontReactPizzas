@@ -67,6 +67,7 @@ const CartContainer = () => {
     
     setIsLoading(true);
     try {
+      console.log(`Calling ${method} on ${url} with token`);
       await axios({
         method,
         url,
@@ -76,7 +77,8 @@ const CartContainer = () => {
       // After mutation, re-fetch the cart so UI updates
       await fetchCart();
     } catch (err) {
-      console.error("Error mutating cart", err);
+      console.error(`Error mutating cart with ${method} on ${url}:`, err.response || err);
+      alert("Error al actualizar el carrito. Por favor, inténtalo de nuevo.");
     } finally {
       setIsLoading(false);
     }
@@ -95,20 +97,20 @@ const CartContainer = () => {
   // Decrease quantity by 1
   const handleDecrease = async productId => {
     if (!cartId || isLoading) return;
-    console.log(`Decreasing quantity for product ${productId} in cart ${cartId}`);
+    console.log(`Decreasing quantity for product ${productId}`);
     await mutateCart(
       "put",
-      `http://localhost:8080/api/carts/${cartId}/product/${productId}/quantity/delete`
+      `http://localhost:8080/api/cart/products/${productId}/quantity/delete`
     );
   };
 
   // Increase quantity by 1
   const handleAdd = async productId => {
     if (!cartId || isLoading) return;
-    console.log(`Adding quantity for product ${productId} in cart ${cartId}`);
+    console.log(`Adding quantity for product ${productId}`);
     await mutateCart(
-      "post",
-      `http://localhost:8080/api/carts/${cartId}/product/${productId}/quantity/1`
+      "put",
+      `http://localhost:8080/api/cart/products/${productId}/quantity/add`
     );
   };
 
@@ -122,6 +124,7 @@ const CartContainer = () => {
       handleDecrease={handleDecrease}
       handleAdd={handleAdd}
       totalPrice={totalPrice}
+      isLoading={isLoading}
     />
   );
 };

@@ -156,3 +156,88 @@
   from { right: -400px; }
   to { right: 0; }
 }
+
+
+/* BORRAR XD*/
+
+/* Si quieres agregar estos estilos a tu archivo cart.css existente */
+
+/* Estilo para los botones */
+.cart-item-actions button {
+  margin: 0 3px;
+  padding: 2px 8px;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cart-item-actions button:hover {
+  background-color: #e0e0e0;
+}
+
+.cart-item-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Estilo para el botón de eliminar */
+.cart-item-actions button:last-child {
+  background-color: #ffeeee;
+  color: #ff5555;
+}
+
+.cart-item-actions button:last-child:hover {
+  background-color: #ffdddd;
+}
+
+/* Indicador de carga */
+.cart-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  color: #666;
+}
+
+/* Mejorar el diseño del ítem del carrito */
+.cart-item {
+  display: flex;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  position: relative;
+}
+
+.cart-item-image {
+  width: 60px;
+  height: 60px;
+  overflow: hidden;
+  margin-right: 10px;
+}
+
+.cart-item-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cart-item-details {
+  flex: 1;
+}
+
+.cart-item-details h6 {
+  margin: 0 0 5px 0;
+  font-weight: bold;
+}
+
+.cart-item-details p {
+  margin: 3px 0;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.cart-item-actions {
+  display: flex;
+  align-items: center;
+}
