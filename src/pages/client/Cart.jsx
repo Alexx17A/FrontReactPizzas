@@ -11,38 +11,50 @@ const Cart = ({
   handleAdd,
   totalPrice,
 }) => {
-  const safeCartItems = cartItems || [];  // 👈 aseguramos array siempre
+  const safeCartItems = cartItems || [];
 
   return (
     <div
       className={`cart-overlay ${isOpen ? "open" : ""}`}
       onClick={handleOutsideClick}
     >
-      <div className="cart">
-        <button className="close-btn" onClick={toggleCart}>
-          ×
-        </button>
-        <h2>Tu Carrito</h2>
-        {safeCartItems.length === 0 ? (
-          <p>El carrito está vacío.</p>
-        ) : (
-          <ul>
-            {safeCartItems.map((item) => (
-              <li key={item.id}>
-                <span>{item.name}</span>
-                <div>
+      <div
+        className={`cart-container ${isOpen ? "open" : ""}`}
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="cart-header">
+          <h2 className="cart-title">Tu Carrito</h2>
+          <button className="cart-close-button" onClick={toggleCart}>
+            ×
+          </button>
+        </div>
+
+        <div className="cart-body">
+          {safeCartItems.length === 0 ? (
+            <p>El carrito está vacío.</p>
+          ) : (
+            safeCartItems.map(item => (
+              <div className="cart-item" key={item.id}>
+                <div className="cart-item-image">
+                  {item.image && <img src={item.image} alt={item.name} />}
+                </div>
+                <div className="cart-item-details">
+                  <h6>{item.name}</h6>
+                  <p>Precio: ${item.price}</p>
+                  <p>Cantidad: {item.quantity}</p>
+                </div>
+                <div className="cart-item-actions">
                   <button onClick={() => handleDecrease(item.id)}>-</button>
-                  <span>{item.quantity}</span>
                   <button onClick={() => handleAdd(item)}>+</button>
                   <button onClick={() => handleRemove(item.id)}>Eliminar</button>
                 </div>
-                <p>${item.price * item.quantity}</p>
-              </li>
-            ))}
-          </ul>
-        )}
-        <div className="total">
-          <strong>Total:</strong> ${totalPrice}
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="cart-footer">
+          <strong>Total: ${totalPrice}</strong>
         </div>
       </div>
     </div>

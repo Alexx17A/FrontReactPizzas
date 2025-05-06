@@ -15,7 +15,7 @@ const CartContainer = () => {
   useEffect(() => {
     if (isOpen) {
       const cart = getCart();
-      setCartItems(cart || []);  // 👈 aseguramos array
+      setCartItems(cart || []);  
     }
   }, [isOpen]);
 
@@ -26,7 +26,7 @@ const CartContainer = () => {
 
     const handleCartUpdate = () => {
       const cart = getCart();
-      setCartItems(cart || []);  // 👈 aseguramos array
+      setCartItems(cart || []);  
     };
 
     window.addEventListener("toggleCart", handleToggleCart);
@@ -49,19 +49,19 @@ const CartContainer = () => {
   const handleRemove = (productId) => {
     removeFromCart(productId);
     const cart = getCart();
-    setCartItems(cart || []);  // 👈 aseguramos array
+    setCartItems(cart || []);  
   };
 
   const handleDecrease = (productId) => {
     decreaseQuantity(productId);
     const cart = getCart();
-    setCartItems(cart || []);  // 👈 aseguramos array
+    setCartItems(cart || []);  
   };
 
   const handleAdd = (product) => {
     addToCart(product);
     const cart = getCart();
-    setCartItems(cart || []);  // 👈 aseguramos array
+    setCartItems(cart || []);
   };
 
   const totalPrice = (cartItems || []).reduce(
