@@ -1,68 +1,118 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "../../assets/css/cart.css";
-import {
-  getCart,
-  addToCart,
-  removeFromCart,
-  decreaseQuantity,
-} from "../../components/cartService";
-import Cart from "./Cart";
+import Cart from "./Cart.jsx";
 
 const CartContainer = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [cartId, setCartId] = useState(null);
   const [cartItems, setCartItems] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch the current user's cart
+  const fetchCart = async () => {
+    const token = localStorage.getItem("jwt_token");
+    if (!token) return;
+    
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        "http://localhost:8080/api/carts/users/cart",
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const data = response.data;
+      setCartId(data.cartId);
+      setCartItems(data.products || []);
+      setTotalPrice(data.totalPrice ?? 0);
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      setCartItems([]);
+      setTotalPrice(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (isOpen) {
-      setCartItems(getCart());
-    }
+    if (isOpen) fetchCart();
   }, [isOpen]);
 
+  // Listen for global cart toggle and updates
   useEffect(() => {
-    const handleToggleCart = () => {
-      setIsOpen((prev) => !prev);
-    };
-
+    const handleToggleCart = () => setIsOpen(prev => !prev);
     const handleCartUpdate = () => {
-      setCartItems(getCart());
+      if (isOpen) fetchCart();
     };
 
     window.addEventListener("toggleCart", handleToggleCart);
     window.addEventListener("cartUpdated", handleCartUpdate);
-
     return () => {
       window.removeEventListener("toggleCart", handleToggleCart);
       window.removeEventListener("cartUpdated", handleCartUpdate);
     };
-  }, []);
+  }, [isOpen]);
 
-  const toggleCart = () => setIsOpen(!isOpen);
+  const toggleCart = () => setIsOpen(prev => !prev);
+  const handleOutsideClick = e =>
+    e.target.classList.contains("cart-overlay") && toggleCart();
 
-  const handleOutsideClick = (e) => {
-    if (e.target.classList.contains("cart-overlay")) {
-      toggleCart();
+  // Generic method to call cart mutate endpoints and refresh state
+  const mutateCart = async (method, url) => {
+    const token = localStorage.getItem("jwt_token");
+    if (!token) return;
+    
+    setIsLoading(true);
+    try {
+      console.log(`Calling ${method} on ${url} with token`);
+      await axios({
+        method,
+        url,
+        withCredentials: true,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      // After mutation, re-fetch the cart so UI updates
+      await fetchCart();
+    } catch (err) {
+      console.error(`Error mutating cart with ${method} on ${url}:`, err.response || err);
+      alert("Error al actualizar el carrito. Por favor, inténtalo de nuevo.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleRemove = (productId) => {
-    removeFromCart(productId);
-    setCartItems(getCart());
+  // Remove entire product from cart
+  const handleRemove = async productId => {
+    if (!cartId || isLoading) return;
+    console.log(`Removing product ${productId} from cart ${cartId}`);
+    await mutateCart(
+      "delete",
+      `http://localhost:8080/api/carts/${cartId}/product/${productId}`
+    );
   };
 
-  const handleDecrease = (productId) => {
-    decreaseQuantity(productId);
-    setCartItems(getCart());
+  // Decrease quantity by 1
+  const handleDecrease = async productId => {
+    if (!cartId || isLoading) return;
+    console.log(`Decreasing quantity for product ${productId}`);
+    await mutateCart(
+      "put",
+      `http://localhost:8080/api/cart/products/${productId}/quantity/delete`
+    );
   };
 
-  const handleAdd = (product) => {
-    addToCart(product);
-    setCartItems(getCart());
+  // Increase quantity by 1
+  const handleAdd = async productId => {
+    if (!cartId || isLoading) return;
+    console.log(`Adding quantity for product ${productId}`);
+    await mutateCart(
+      "put",
+      `http://localhost:8080/api/cart/products/${productId}/quantity/add`
+    );
   };
-
-  const totalPrice = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
 
   return (
     <Cart
@@ -74,6 +124,7 @@ const CartContainer = () => {
       handleDecrease={handleDecrease}
       handleAdd={handleAdd}
       totalPrice={totalPrice}
+      isLoading={isLoading}
     />
   );
 };
