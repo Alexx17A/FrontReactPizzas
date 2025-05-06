@@ -4,11 +4,11 @@ import {
   getCart,
   addToCart,
   removeFromCart,
-  decreaseQuantity
+  decreaseQuantity,
 } from "../../components/cartService";
-import CartUI from "./Cart.jsx";
+import Cart from "./Cart";
 
-const Cart = () => {
+const CartContainer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [cartItems, setCartItems] = useState([]);
 
@@ -20,11 +20,19 @@ const Cart = () => {
 
   useEffect(() => {
     const handleToggleCart = () => {
-      setIsOpen(prev => !prev);
+      setIsOpen((prev) => !prev);
     };
+
+    const handleCartUpdate = () => {
+      setCartItems(getCart());
+    };
+
     window.addEventListener("toggleCart", handleToggleCart);
+    window.addEventListener("cartUpdated", handleCartUpdate);
+
     return () => {
       window.removeEventListener("toggleCart", handleToggleCart);
+      window.removeEventListener("cartUpdated", handleCartUpdate);
     };
   }, []);
 
@@ -51,10 +59,13 @@ const Cart = () => {
     setCartItems(getCart());
   };
 
-  const totalPrice = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalPrice = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
   return (
-    <CartUI
+    <Cart
       isOpen={isOpen}
       toggleCart={toggleCart}
       handleOutsideClick={handleOutsideClick}
@@ -67,4 +78,4 @@ const Cart = () => {
   );
 };
 
-export default Cart;
+export default CartContainer;
