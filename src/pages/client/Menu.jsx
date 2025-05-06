@@ -82,7 +82,7 @@ const MenuUI = ({
                     <button 
                       className="page-link" 
                       onClick={() => setPage(i)}
-                    >
+                    > 
                       {i + 1}
                     </button>
                   </li>
