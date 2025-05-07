@@ -15,8 +15,8 @@ const Sidebar = () => {
       <ul className="nav flex-column px-3">
         <li className="nav-item">
           <Link
-            to="/"
-            className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
+            to="/home"
+            className={`nav-link ${location.pathname === '/home' ? 'active' : ''}`}
           >
             Dashboard
           </Link>

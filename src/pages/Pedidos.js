@@ -13,7 +13,7 @@ const Orders = () => {
   useEffect(() => {
     AOS.init({ duration: 1000 });
 
-    axios.get('/api/orders')
+    axios.get('api/orders')
       .then(res => setOrders(res.data))
       .catch(err => console.error('Error al traer Pedidos:', err));
   }, []);
