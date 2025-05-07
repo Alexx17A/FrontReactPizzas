@@ -184,7 +184,7 @@ const StoreHome = () => {
                   <h5 className="card-title">{product.nombre}</h5>
                   <p className="card-text fs-5 fw-bold text-danger">${product.precio}</p>
                   <Link
-                    to={`/producto/${product.id}`}
+                    to={`/menu`}
                     className="btn btn-danger rounded-pill px-4 w-100"
                   >
                     Ver más

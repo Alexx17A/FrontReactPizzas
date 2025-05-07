@@ -20,9 +20,7 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/pedidos" element={<Pedidos />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<StoreHome />} />
         <Route path="/tienda" element={<StoreHome />} />
         <Route path="/producto/:id" element={<ProductDetail />} />
         <Route path="/menu" element={<Menu />} />
@@ -39,6 +37,26 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/pedidos"
+          element={
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/products"
+          element={
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+
+
       </Routes>
     </Router>
   );
