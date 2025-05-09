@@ -22,8 +22,6 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/pedidos" element={<Pedidos />} />
-        <Route path="/products" element={<Products />} />
         <Route path="/" element={<Login />} />
         <Route path="/tienda" element={<StoreHome />} />
         <Route path="/producto/:id" element={<ProductDetail />} />
@@ -39,6 +37,38 @@ const App = () => {
           element={
             <ProtectedRoute requiredRole="ROLE_ADMIN">
               <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/products"
+          element={
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
+              <Products />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/categories"
+          element={
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
+              <Categories />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/carts"
+          element={
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
+              <Carts />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/pedidos"
+          element={
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
+              <Pedidos />
             </ProtectedRoute>
           }
         />
