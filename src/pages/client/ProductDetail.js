@@ -116,11 +116,14 @@ const ProductDetail = () => {
         })
         .catch(err => {
           console.error("Error al cargar el producto desde 8080:", err);
+
           setDefaultProduct(); // Cambiado de useDefaultProduct a setDefaultProduct
+
         });
     };
     
     // Función para usar un producto por defecto
+
     const setDefaultProduct = () => {
       const categoria = 'pizza';
       const dummyProducto = normalizeProductData({

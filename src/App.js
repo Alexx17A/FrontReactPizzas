@@ -72,6 +72,14 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/products"
+          element={
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
+              <Home />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );
