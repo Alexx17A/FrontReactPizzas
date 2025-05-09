@@ -1,19 +1,18 @@
 import axios from 'axios';
 
-// Crear una instancia de axios para configurar los headers
 const api = axios.create({
-  baseURL: 'TU HOST AQUI',  // Cambia por tu URL de la API
+  baseURL: 'http://localhost:8080/api',
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true // This ensures cookies are sent with requests
 });
 
-// Función para obtener el token desde el localStorage
+// Get token from localStorage
 const getToken = () => {
   return localStorage.getItem('jwt_token');
 };
 
-// Interceptor para añadir el JWT a las cabeceras de las peticiones
 api.interceptors.request.use(
   (config) => {
     const token = getToken();
