@@ -1,24 +1,25 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import api from '../services/api';
-import Sidebar from '../components/Navbar';
-import EditProductModal from '../components/modals/EditProductModal';
-import AddProductModal from '../components/modals/AddProductModal';
-import FeedbackModal from '../components/modals/FeedbackModal';
+import api from '../../services/api';
+import Sidebar from '../../components/Navbar';
+import EditProductModal from '../../components/modals/EditProductModal';
+import AddProductModal from '../../components/modals/AddProductModal';
+import FeedbackModal from '../../components/modals/FeedbackModal';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
-import '../assets/css/product.css';
+import '../../assets/css/product.css';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [searchTerm, setSearchTerm] = useState(''); // For input field
-  const [searchQuery, setSearchQuery] = useState(''); // For actual search
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
 
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -55,11 +56,12 @@ const Products = () => {
     try {
       setLoading(true);
       setError(null);
+      setProducts([]);
+      setFilteredProducts([]);
   
       let url = '';
       
       if (searchQuery.trim() !== '') {
-        // Use template literal for keyword search
         url = `/public/products/keyword/${encodeURIComponent(searchQuery.trim())}?page=${page}`;
       } else if (selectedCategory) {
         url = `/public/categories/${selectedCategory}/products?pageNumber=${page}`;
@@ -69,7 +71,9 @@ const Products = () => {
   
       const response = await api.get(url);
       
-      setProducts(response.data.content || []);
+      const fetchedProducts = response.data.content || [];
+      setProducts(fetchedProducts);
+      setFilteredProducts(fetchedProducts);
       setTotalPages(response.data.totalPages || 1);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -89,6 +93,18 @@ const Products = () => {
       setLoading(false);
     }
   }, [page, searchQuery, selectedCategory]);
+
+  useEffect(() => {
+    if (searchTerm === '') {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(product => 
+        product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      setFilteredProducts(filtered);
+    }
+  }, [searchTerm, products]);
 
   useEffect(() => {
     AOS.init({ duration: 1000 });
@@ -201,23 +217,8 @@ const Products = () => {
               className="form-control me-2"
               placeholder="Buscar producto..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  setSearchQuery(searchTerm);
-                  setPage(0);
-                }
-              }}              
+              onChange={(e) => setSearchTerm(e.target.value)}             
             />
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                setSearchQuery(searchTerm);
-                setPage(0);
-              }}
-            >
-              Buscar
-            </button>
           </div>
           <div className="ms-3">
             <select
@@ -257,16 +258,16 @@ const Products = () => {
               </tr>
             </thead>
             <tbody>
-              {products.length > 0 ? (
-                products.map(product => (
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map(product => (
                   <tr key={product.productId}>
                     <td>{product.productId}</td>
                     <td>{product.productName}</td>
                     <td>{product.description}</td>
                     <td>{product.quantity}</td>
                     <td>${parseFloat(product.price).toFixed(2)}</td>
-                    <td>{product.discount}</td>
-                    <td>{product.specialPrice}</td>
+                    <td>{product.discount}%</td>
+                    <td>${parseFloat(product.specialPrice).toFixed(2)}</td>
                     <td>
                       <button className="btn btn-warning btn-sm me-2" onClick={() => handleEdit(product)}>Editar</button>
                       <button className="btn btn-danger btn-sm" onClick={() => handleDelete(product.productId)}>Eliminar</button>
@@ -274,7 +275,13 @@ const Products = () => {
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan="8" className="text-center text-muted">No hay productos registrados.</td></tr>
+                <tr><td colSpan="8" className="text-center text-muted">
+                  {searchTerm 
+                    ? "No se encontraron productos." 
+                    : selectedCategory 
+                      ? "No hay productos en esta categoría." 
+                      : "No hay productos registrados."}
+                </td></tr>
               )}
             </tbody>
           </table>

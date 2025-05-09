@@ -1,10 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './pages/Home';
+import Home from './pages/admin/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import Pedidos from './pages/Pedidos';
-import Products from './pages/Products';
+import Pedidos from './pages/admin/Pedidos';
+import Products from './pages/admin/Products';
+import Categories from './pages/admin/Categories';
+import Carts from './pages/admin/Carts';
 import StoreHome from './pages/client/Index';
 import ProductDetail from './pages/client/ProductDetail';
 import Menu from './pages/client/Menu';
@@ -21,7 +23,6 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/pedidos" element={<Pedidos />} />
-        <Route path="/products" element={<Products />} />
         <Route path="/" element={<Login />} />
         <Route path="/tienda" element={<StoreHome />} />
         <Route path="/producto/:id" element={<ProductDetail />} />
@@ -31,11 +32,36 @@ const App = () => {
         <Route path="/Registro" element={<RegistroUsuarios />} />
         <Route path="/about" element={<SobreNosotros />} /> 
 
+        {/* Protected Admin Routes */}
         <Route
           path="/home"
           element={
             <ProtectedRoute requiredRole="ROLE_ADMIN">
               <Home />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/products"
+          element={
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
+              <Products />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/categories"
+          element={
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
+              <Categories />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/carts"
+          element={
+            <ProtectedRoute requiredRole="ROLE_ADMIN">
+              <Carts />
             </ProtectedRoute>
           }
         />
