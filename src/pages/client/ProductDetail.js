@@ -111,17 +111,17 @@ const ProductDetail = () => {
             setProducto(productoData);
             setLoading(false);
           } else {
-            useDefaultProduct();
+            setDefaultProduct(); // Cambiado de useDefaultProduct a setDefaultProduct
           }
         })
         .catch(err => {
           console.error("Error al cargar el producto desde 8080:", err);
-          useDefaultProduct();
+          setDefaultProduct(); // Cambiado de useDefaultProduct a setDefaultProduct
         });
     };
     
     // Función para usar un producto por defecto
-    const useDefaultProduct = () => {
+    const setDefaultProduct = () => {
       const categoria = 'pizza';
       const dummyProducto = normalizeProductData({
         id,
@@ -157,7 +157,7 @@ const ProductDetail = () => {
       <div className="row justify-content-center align-items-center mb-5">
         <div className="col-md-6 mb-4">
           <img
-            src={producto.imagen}
+ three            src={producto.imagen}
             alt={producto.nombre}
             className="img-fluid rounded shadow-lg border border-light"
             style={{ maxHeight: '400px', width: '100%', objectFit: 'cover' }}

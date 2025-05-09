@@ -125,7 +125,7 @@ const Carts = () => {
                         {cart.products?.length > 0 ? (
                           cart.products.map(product => (
                             <li key={product.productId}>
-                              {product.productName} (${product.price?.toFixed(2) || '0.00'}) × {product.quantity}
+                              {product.productName} (${product.price?.toFixed(2) || '0.00'}) x {product.quantity}
                             </li>
                           ))
                         ) : (

@@ -81,6 +81,7 @@ const Categories = () => {
         fetchCategories();
         showFeedback('Categoría eliminada correctamente.');
       } catch (err) {
+        console.error('Error deleting category:', err);
         showFeedback('Error al eliminar categoría.', 'error');
       }
     }
