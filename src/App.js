@@ -1,87 +1,88 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './pages/admin/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Pedidos from './pages/admin/Pedidos';
-import Products from './pages/admin/Products';
+import { Routes, Route, Navigate } from 'react-router-dom';
+
+// Admin imports
+import AdminHome from './pages/admin/Home';
+import AdminPedidos from './pages/admin/Pedidos';
+import AdminProducts from './pages/admin/Products';
 import Categories from './pages/admin/Categories';
 import Carts from './pages/admin/Carts';
+import AdminLayout from './components/AdminLayout';
+
+// Client/Store imports
 import StoreHome from './pages/client/Index';
 import ProductDetail from './pages/client/ProductDetail';
 import Menu from './pages/client/Menu';
+import Checkout from './pages/checkout/Checkout';
+
+// Auth imports
+import Login from './pages/Login';
+import Register from './pages/Register';
 import AuthForm from './pages/client/AuthForm';
-import Checkout from './pages/client/Checkout';
 import RegistroUsuarios from './pages/RegistroUsuarios';
-import SobreNosotros from './pages/SobreNosotros'; 
+
+// Public Pages
+import SobreNosotros from './pages/SobreNosotros';
+
+// Components and Providers
 import ProtectedRoute from './components/ProtectedRoute';
+import Layout from './components/checkout/Layout';
+import { AuthProvider } from './context/AuthContext';
 
 const App = () => {
   return (
-    <Router>
+    <AuthProvider>
       <Routes>
+        {/* ============= RUTAS DE AUTENTICACIÓN (SIN LAYOUT) ============= */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/" element={<Login />} />
-        <Route path="/tienda" element={<StoreHome />} />
-        <Route path="/producto/:id" element={<ProductDetail />} />
-        <Route path="/menu" element={<Menu />} />
         <Route path="/auth" element={<AuthForm />} />
-        <Route path="/checkout" element={<Checkout />} />
         <Route path="/Registro" element={<RegistroUsuarios />} />
-        <Route path="/about" element={<SobreNosotros />} /> 
 
-        {/* Protected Admin Routes */}
+        {/* ============= RUTAS PÚBLICAS DE LA TIENDA (CON LAYOUT Y PADDING) ============= */}
+        <Route path="/" element={<Layout withNavbarPadding={true} ><StoreHome /></Layout>} />
+        <Route path="/tienda" element={<Layout withNavbarPadding={false}><StoreHome /></Layout>} />
+        <Route path="/menu" element={<Layout withNavbarPadding={true} navbarSolid={true}><Menu /></Layout>} />
+        <Route path="/about" element={<Layout withNavbarPadding={true} navbarSolid={true}><SobreNosotros /></Layout>} />
+
+        {/* ============= PRODUCT DETAIL (SIN PADDING) ============= */}
+        <Route path="/producto/:id" element={<Layout withNavbarPadding={false}><ProductDetail /></Layout>} />
+
+        {/* Rutas Admin agrupadas */}
         <Route
-          path="/home"
+          path="/admin"
           element={
-            <ProtectedRoute requiredRole="ROLE_ADMIN">
-              <Home />
+            <ProtectedRoute requiredRole={['ROLE_ADMIN', 'ROLE_SELLER']}>
+              <AdminLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<AdminHome />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="categories" element={<Categories />} />
+          <Route path="carts" element={<Carts />} />
+          <Route path="pedidos" element={<AdminPedidos />} />
+        </Route>
+
+
+        {/* ============= RUTA PROTEGIDA DEL CHECKOUT (SIN PADDING) ============= */}
         <Route
-          path="/products"
+          path="/checkout"
           element={
-            <ProtectedRoute requiredRole="ROLE_ADMIN">
-              <Products />
-            </ProtectedRoute>
+            <Layout withNavbarPadding={false} navbarSolid={true}>
+              <Checkout />
+            </Layout>
+
           }
         />
-        <Route
-          path="/categories"
-          element={
-            <ProtectedRoute requiredRole="ROLE_ADMIN">
-              <Categories />
-            </ProtectedRoute>
-          }
-        />
-         <Route
-          path="/carts"
-          element={
-            <ProtectedRoute requiredRole="ROLE_ADMIN">
-              <Carts />
-            </ProtectedRoute>
-          }
-        />
-         <Route
-          path="/pedidos"
-          element={
-            <ProtectedRoute requiredRole="ROLE_ADMIN">
-              <Pedidos />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/products"
-          element={
-            <ProtectedRoute requiredRole="ROLE_ADMIN">
-              <Home />
-            </ProtectedRoute>
-          }
-        />
+
+        {/* ============= RUTAS PROTEGIDAS DE ADMINISTRADOR (SIN PADDING) ============= */}
+
+
+        {/* ============= RUTA DE FALLBACK ============= */}
+        <Route path="*" element={<Navigate to="/tienda" replace />} />
       </Routes>
-    </Router>
+    </AuthProvider>
   );
 };
 

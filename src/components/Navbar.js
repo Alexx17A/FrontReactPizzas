@@ -1,37 +1,17 @@
 // src/components/Sidebar.js
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom'; // Cambiamos Link por NavLink
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../assets/css/sidebar.css';
-import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 const Sidebar = () => {
-  const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
-    try {
-      // Call backend logout endpoint
-      await axios.post('/api/auth/signout', {}, { 
-        withCredentials: true // Important for cookies
-      });
-      
-      // Clear client-side storage (for non-HttpOnly tokens if any)
-      localStorage.clear();
-      sessionStorage.clear();
-      
-      // Redirect to login
-      navigate('/login');
-      
-      // Force full page reload to ensure all cookies are cleared
-      window.location.reload();
-    } catch (error) {
-      console.error('Logout failed:', error);
-      // Fallback: still clear client storage and redirect
-      localStorage.clear();
-      sessionStorage.clear();
-      navigate('/login');
-    }
+    await logout();
+    navigate('/login');
   };
 
   return (
@@ -42,44 +22,45 @@ const Sidebar = () => {
         </div>
         <ul className="nav flex-column px-3">
           <li className="nav-item">
-            <Link
-              to="/home"
-              className={`nav-link ${location.pathname === '/home' ? 'active' : ''}`}
+            <NavLink
+              to="/admin"
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+              end // Importante para que solo coincida con /admin exactamente
             >
               Dashboard
-            </Link>
+            </NavLink>
           </li>
           <li className="nav-item">
-            <Link
-              to="/pedidos"
-              className={`nav-link ${location.pathname === '/pedidos' ? 'active' : ''}`}
+            <NavLink
+              to="/admin/pedidos"
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
             >
               Pedidos
-            </Link>
+            </NavLink>
           </li>
           <li className="nav-item">
-            <Link
-              to="/products"
-              className={`nav-link ${location.pathname === '/products' ? 'active' : ''}`}
+            <NavLink
+              to="/admin/products"
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
             >
               Productos
-            </Link>
+            </NavLink>
           </li>
           <li className="nav-item">
-            <Link
-              to="/categories"
-              className={`nav-link ${location.pathname === '/categories' ? 'active' : ''}`}
+            <NavLink
+              to="/admin/categories"
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
             >
               Categories
-            </Link>
+            </NavLink>
           </li>
           <li className="nav-item">
-            <Link
-              to="/carts"
-              className={`nav-link ${location.pathname === '/carts' ? 'active' : ''}`}
+            <NavLink
+              to="/admin/carts"
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
             >
               Carts
-            </Link>
+            </NavLink>
           </li>
         </ul>
       </div>

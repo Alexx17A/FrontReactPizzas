@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../services/api"; // Usa tu instancia centralizada de axios
 import "../../assets/css/cart.css";
 import Cart from "./Cart.jsx";
 
@@ -12,18 +12,9 @@ const CartContainer = () => {
 
   // Fetch the current user's cart
   const fetchCart = async () => {
-    const token = localStorage.getItem("jwt_token");
-    if (!token) return;
-    
     setIsLoading(true);
     try {
-      const response = await axios.get(
-        "http://localhost:8080/api/carts/users/cart",
-        {
-          withCredentials: true,
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await api.get("/carts/users/cart");
       const data = response.data;
       setCartId(data.cartId);
       setCartItems(data.products || []);
@@ -39,6 +30,7 @@ const CartContainer = () => {
 
   useEffect(() => {
     if (isOpen) fetchCart();
+    // eslint-disable-next-line
   }, [isOpen]);
 
   // Listen for global cart toggle and updates
@@ -54,6 +46,7 @@ const CartContainer = () => {
       window.removeEventListener("toggleCart", handleToggleCart);
       window.removeEventListener("cartUpdated", handleCartUpdate);
     };
+    // eslint-disable-next-line
   }, [isOpen]);
 
   const toggleCart = () => setIsOpen(prev => !prev);
@@ -62,17 +55,11 @@ const CartContainer = () => {
 
   // Generic method to call cart mutate endpoints and refresh state
   const mutateCart = async (method, url) => {
-    const token = localStorage.getItem("jwt_token");
-    if (!token) return;
-    
     setIsLoading(true);
     try {
-      console.log(`Calling ${method} on ${url} with token`);
-      await axios({
+      await api({
         method,
         url,
-        withCredentials: true,
-        headers: { Authorization: `Bearer ${token}` },
       });
       // After mutation, re-fetch the cart so UI updates
       await fetchCart();
@@ -87,30 +74,27 @@ const CartContainer = () => {
   // Remove entire product from cart
   const handleRemove = async productId => {
     if (!cartId || isLoading) return;
-    console.log(`Removing product ${productId} from cart ${cartId}`);
     await mutateCart(
       "delete",
-      `http://localhost:8080/api/carts/${cartId}/product/${productId}`
+      `/carts/${cartId}/product/${productId}`
     );
   };
 
   // Decrease quantity by 1
   const handleDecrease = async productId => {
     if (!cartId || isLoading) return;
-    console.log(`Decreasing quantity for product ${productId}`);
     await mutateCart(
       "put",
-      `http://localhost:8080/api/cart/products/${productId}/quantity/delete`
+      `/cart/products/${productId}/quantity/delete`
     );
   };
 
   // Increase quantity by 1
   const handleAdd = async productId => {
     if (!cartId || isLoading) return;
-    console.log(`Adding quantity for product ${productId}`);
     await mutateCart(
       "put",
-      `http://localhost:8080/api/cart/products/${productId}/quantity/add`
+      `/cart/products/${productId}/quantity/add`
     );
   };
 

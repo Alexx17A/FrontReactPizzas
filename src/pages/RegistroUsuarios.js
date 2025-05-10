@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -16,10 +17,12 @@ const RegistroUsuarios = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   // Inicializar AOS
-  React.useEffect(() => {
+  useEffect(() => {
     AOS.init({
       duration: 600,
       easing: 'ease-out-quad',
@@ -34,10 +37,7 @@ const RegistroUsuarios = () => {
       ...prev,
       [name]: value
     }));
-    // Limpiar error al escribir
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: '' }));
-    }
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const validateForm = () => {
@@ -47,41 +47,63 @@ const RegistroUsuarios = () => {
     if (!formData.nombre.trim()) newErrors.nombre = 'Nombre requerido';
     if (!emailRegex.test(formData.email)) newErrors.email = 'Email inválido';
     if (formData.password.length < 6) newErrors.password = 'Mínimo 6 caracteres';
-    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Las contraseñas no coinciden';
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Las contraseñas no coinciden';
+    }
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!validateForm()) return;
+  
+  setIsSubmitting(true);
+  
+  try {
+    // 1. Registrar usuario
+    await api.post('/auth/signup', {
+      username: formData.nombre,
+      email: formData.email,
+      password: formData.password
+    });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+    // 2. Mostrar animación de éxito inmediatamente
+    setRegistrationSuccess(true);
     
-    setIsSubmitting(true);
+    // 3. Esperar el tiempo mínimo de la animación (2 segundos)
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
+    // 4. Intentar login automático
     try {
-      // Conexión con tu backend
-      const response = await axios.post('http://localhost:8080/api/auth/signup', {
-        username: formData.nombre,
-        email: formData.email,
-        password: formData.password,
-       // telefono: formData.telefono pense que ibamos a ocupar el telefono XD pero ya vi que no
-      });
-
-      // Guardar token en localStorage
-      localStorage.setItem('authToken', response.data.token);
+      const loginResult = await login(formData.nombre, formData.password);
       
-      setRegistrationSuccess(true);
-      setTimeout(() => navigate('/'), 2000);
-    } catch (error) {
-      console.error('Error al registrar:', error);
-      setErrors({ 
-        submit: error.response?.data?.message || 'Error al registrar. Intenta nuevamente.' 
-      });
-    } finally {
-      setIsSubmitting(false);
+      // 5. Redirigir según rol
+      const redirectPath = loginResult.data.roles.includes('ROLE_ADMIN') 
+        ? '/admin' 
+        : '/tienda';
+      navigate(redirectPath);
+      
+    } catch (loginError) {
+      // 6. Si falla el login, redirigir igual
+      navigate('/login');
     }
-  };
+
+  } catch (error) {
+    console.error('Error al registrar:', error);
+    const errorMessage = error.response?.data?.message || 'Error al registrar. Intenta nuevamente.';
+    
+    if (errorMessage.includes('Username is already taken')) {
+      setErrors({ nombre: 'Este nombre de usuario ya está en uso' });
+    } else if (errorMessage.includes('Email is already in use')) {
+      setErrors({ email: 'Este correo electrónico ya está registrado' });
+    } else {
+      setErrors({ submit: errorMessage });
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="registro-wrapper">
@@ -91,7 +113,9 @@ const RegistroUsuarios = () => {
             🍕
           </div>
           <h2 data-aos="fade-down" data-aos-delay="150">Crear Cuenta</h2>
-          <p data-aos="fade-down" data-aos-delay="200">Únete a la familia TazzPizza <br/>y recibe grandes Descuentos % </p>
+          <p data-aos="fade-down" data-aos-delay="200">
+            Únete a la familia TazzPizza <br/>y recibe grandes Descuentos %
+          </p>
         </div>
 
         {registrationSuccess ? (
@@ -102,7 +126,8 @@ const RegistroUsuarios = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="registro-form">
-          <div className={`input-group ${errors.nombre ? 'error' : ''}`} data-aos="fade-up" data-aos-delay="250">
+            {/* Campos del formulario igual que en el segundo componente */}
+            <div className={`input-group ${errors.nombre ? 'error' : ''}`} data-aos="fade-up" data-aos-delay="250">
               <input
                 type="text"
                 name="nombre"
@@ -163,11 +188,7 @@ const RegistroUsuarios = () => {
               data-aos="fade-up"
               data-aos-delay="500"
             >
-              {isSubmitting ? (
-                <span className="spinner"></span>
-              ) : (
-                'Registrarse'
-              )}
+              {isSubmitting ? <span className="spinner"></span> : 'Registrarse'}
             </button>
 
             <div className="login-link" data-aos="fade-up" data-aos-delay="550">

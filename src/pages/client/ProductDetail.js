@@ -66,7 +66,7 @@ const ProductDetail = () => {
     setLoading(true);
     
     // Obtener el producto - prueba primero con el endpoint 8000
-    axios.get(`http://localhost:8000/api/products/${id}`)
+    axios.get(`http://localhost:8080/api/products/${id}`)
       .then(res => {
         if (res.data) {
           const productoData = normalizeProductData(res.data);
@@ -74,7 +74,7 @@ const ProductDetail = () => {
           
           // Cargar productos relacionados de la misma categoría
           if (productoData.categoria) {
-            axios.get(`http://localhost:8000/api/products/category/${productoData.categoria}`)
+            axios.get(`http://localhost:8080/api/products/category/${productoData.categoria}`)
               .then(relRes => {
                 // Filtrar para no incluir el producto actual
                 const relacionados = relRes.data

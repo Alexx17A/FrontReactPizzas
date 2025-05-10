@@ -1,31 +1,27 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../services/api"; 
 import MenuUI from "./Menu.jsx";
+import { useAuth } from "../../context/AuthContext"; 
 
 const Menu = () => {
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState("all");
-  const [username, setUsername] = useState("");
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // Si quieres mostrar el username:
+  const { user } = useAuth();
+  const username = user?.username || "";
+
   const fetchProducts = (selectedCategory, pageNumber = 0) => {
-    const token = localStorage.getItem("jwt_token");
-    setUsername(localStorage.getItem("username") || "");
-  
-    if (!token) {
-      console.error("No hay JWT en localStorage");
-      return;
-    }
-  
     setIsLoading(true);
     setProducts([]);
-  
+
     let url = "";
     if (selectedCategory === "all") {
-      url = `http://localhost:8080/api/public/products?sortBy=price&sortOrder=desc&pageSize=20&pageNumber=${pageNumber}`;
+      url = `/public/products?sortBy=price&sortOrder=desc&pageSize=20&pageNumber=${pageNumber}`;
     } else {
       const categoryIds = {
         pizza: 1,
@@ -35,43 +31,31 @@ const Menu = () => {
         hamburguesa: 5,
         tacos: 6,
       };
-  
+
       const categoryId = categoryIds[selectedCategory.toLowerCase()];
       if (!categoryId) {
         console.error("Categoría no válida:", selectedCategory);
         setIsLoading(false);
         return;
       }
-      url = `http://localhost:8080/api/public/categories/${categoryId}/products?pageSize=20&pageNumber=${pageNumber}`;
+      url = `/public/categories/${categoryId}/products?pageSize=20&pageNumber=${pageNumber}`;
     }
-  
-    axios.get(url, {
-      withCredentials: true,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    .then((res) => {
-      setProducts(res.data.content || []);
-      setTotalPages(res.data.totalPages || 1);
-    })
-    .catch((err) => {
-      console.error("No se pudo obtener el menú.", err);
-      setProducts([]);
-    })
-    .finally(() => {
-      setIsLoading(false);
-    });
+
+    api.get(url)
+      .then((res) => {
+        setProducts(res.data.content || []);
+        setTotalPages(res.data.totalPages || 1);
+      })
+      .catch((err) => {
+        console.error("No se pudo obtener el menú.", err);
+        setProducts([]);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
-  
+
   const fetchProductsByKeyword = (keyword) => {
-    const token = localStorage.getItem("jwt_token");
-
-    if (!token) {
-      console.error("No hay JWT en localStorage");
-      return;
-    }
-
     setIsLoading(true);
 
     if (!keyword.trim()) {
@@ -79,46 +63,24 @@ const Menu = () => {
       return;
     }
 
-    axios.get(
-      `http://localhost:8080/api/public/products/keyword/${keyword.trim()}`,
-      {
-        withCredentials: true,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
-    .then((res) => {
-      setProducts(res.data || []);
-      setTotalPages(1);
-    })
-    .catch((err) => {
-      console.error("Error al buscar productos por keyword.", err);
-    })
-    .finally(() => {
-      setIsLoading(false);
-    });
+    api.get(`/public/products/keyword/${keyword.trim()}`)
+      .then((res) => {
+        setProducts(res.data || []);
+        setTotalPages(1);
+      })
+      .catch((err) => {
+        console.error("Error al buscar productos por keyword.", err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   const handleAddToCart = async (productId, quantity) => {
-    const token = localStorage.getItem("jwt_token");
-    
-    if (!token) {
-      console.error("No hay JWT en localStorage");
-      return;
-    }
-
     try {
-      const response = await axios.post(
-        `http://localhost:8080/api/carts/products/${productId}/quantity/${quantity}`,
-        {},
-        {
-          withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
+      const response = await api.post(
+        `/carts/products/${productId}/quantity/${quantity}`,
+        {}
       );
 
       if (response.status === 201) {
@@ -134,6 +96,7 @@ const Menu = () => {
     if (!searchTerm) {
       fetchProducts(category, page);
     }
+    // eslint-disable-next-line
   }, [category, page]);
 
   const handleCategoryChange = (e) => {
