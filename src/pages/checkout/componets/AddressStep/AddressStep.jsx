@@ -1,7 +1,7 @@
 // src/pages/checkout/AddressStep.jsx
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { setAddress, nextStep } from '../../store/slices/checkout/checkoutSlice';
+import { setAddress, nextStep } from '../../../../store/slices/checkout/checkoutSlice';
 import AddressForm from './AddressForm';
 
 const AddressStep = () => {
