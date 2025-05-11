@@ -1,43 +1,93 @@
+// src/pages/checkout/AddressList.jsx
 import React from 'react';
-import { Radio, RadioGroup, FormControlLabel, Paper, Button } from '@mui/material';
+import './AddressList.css';
 
-export const AddressList = ({ addresses, onEdit, onDelete }) => {
+const AddressList = ({ addresses, selectedAddress, onSelect, onEdit, onDelete }) => {
+  const handleAddressClick = (e, address) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSelect(address);
+  };
+
+  const handleEditClick = (e, address) => {
+    e.stopPropagation();
+    onEdit(address);
+  };
+
+  const handleDeleteClick = (e, addressId) => {
+    e.stopPropagation();
+    onDelete(addressId);
+  };
+
   return (
-    <div className="space-y-4">
-      <RadioGroup>
-        {addresses.map((address) => (
-          <Paper key={address.id} className="p-4 mb-3">
-            <div className="flex items-center justify-between">
-              <FormControlLabel
-                value={address.id}
-                control={<Radio />}
-                label={
-                  <div>
-                    <p className="font-semibold">{address.buildingName}</p>
-                    <p>{address.street}</p>
-                    <p>{`${address.city}, ${address.state} ${address.pincode}`}</p>
-                  </div>
-                }
-              />
-              <div className="space-x-2">
-                <Button 
-                  size="small" 
-                  onClick={() => onEdit(address)}
-                >
-                  Editar
-                </Button>
-                <Button 
-                  size="small" 
-                  color="error"
-                  onClick={() => onDelete(address.id)}
-                >
-                  Eliminar
-                </Button>
-              </div>
+    <div className="address-list">
+      {addresses.map((address) => (
+        <div
+          key={address.addressId}
+          className={`address-card ${selectedAddress?.addressId === address.addressId ? 'selected' : ''}`}
+          onClick={(e) => handleAddressClick(e, address)}
+        >
+          <div className="address-selector">
+            <div className={`radio-outer ${selectedAddress?.addressId === address.addressId ? 'selected' : ''}`}>
+              <div className={`radio-inner ${selectedAddress?.addressId === address.addressId ? 'selected' : ''}`}></div>
             </div>
-          </Paper>
-        ))}
-      </RadioGroup>
+          </div>
+
+          <div className="address-content">
+            <div className="address-icon">
+              <i className="bi bi-house-door"></i>
+            </div>
+            
+            <div className="address-details">
+              <h6 className="building-name">
+                {address.buildingName}
+                {selectedAddress?.addressId === address.addressId && (
+                  <span className="selected-badge">
+                    <i className="bi bi-check-circle-fill"></i> Seleccionada
+                  </span>
+                )}
+              </h6>
+              <p className="street-name">
+                <i className="bi bi-geo-alt text-muted me-1"></i>
+                {address.street}
+              </p>
+              <div className="address-meta">
+                <span>
+                  <i className="bi bi-building text-muted me-1"></i>
+                  {address.city}
+                </span>
+                <span className="mx-2">•</span>
+                <span>{address.state}</span>
+                <span className="mx-2">•</span>
+                <span>{address.pincode}</span>
+              </div>
+              <small className="country">
+                <i className="bi bi-globe2 text-muted me-1"></i>
+                {address.country}
+              </small>
+            </div>
+
+            <div className="address-actions">
+              <button
+                type="button"
+                className="action-btn edit-btn"
+                onClick={(e) => handleEditClick(e, address)}
+                title="Editar dirección"
+              >
+                <i >🖋️</i>
+              </button>
+              <button
+                type="button"
+                className="action-btn delete-btn"
+                onClick={(e) => handleDeleteClick(e, address.addressId)}
+                title="Eliminar dirección"
+              >
+                <i > 🗑️</i>
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

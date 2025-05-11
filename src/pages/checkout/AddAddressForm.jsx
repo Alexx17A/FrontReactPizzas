@@ -1,148 +1,106 @@
 // src/pages/checkout/AddAddressForm.jsx
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch, useSelector } from 'react-redux';
-import { addAddress } from '../../store/slices/checkout/addressSlice';
-import InputField from '../../components/checkout/InputField';
-import toast from 'react-hot-toast';
 
-const AddAddressForm = ({ setOpenAddressModal, address }) => {
-  const dispatch = useDispatch();
-  const { loading, error } = useSelector(state => state.address);
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-    reset
-  } = useForm({
-    mode: "onTouched",
-    defaultValues: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: '',
-      country: ''
-    }
+const AddAddressForm = ({ initialData = {}, onSubmit, loading = false }) => {
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: initialData
   });
 
-  const onSubmit = async (data) => {
-    try {
-      const newAddress = { ...data, id: Date.now() };
-      dispatch(addAddress(newAddress));
-      toast.success(address ?
-        '¡Dirección actualizada exitosamente!' :
-        '¡Dirección agregada exitosamente!'
-      );
-      reset();
-      setOpenAddressModal(false);
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al guardar la dirección');
-    }
-  };
-
-  const validations = {
-    street: {
-      required: "La calle es requerida"
-    },
-    city: {
-      required: "La ciudad es requerida",
-      pattern: {
-        value: /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/,
-        message: "La ciudad solo debe contener letras"
-      }
-    },
-    state: {
-      required: "El estado es requerido"
-    },
-    zipCode: {
-      required: "El código postal es requerido",
-      pattern: {
-        value: /^\d{5}$/,
-        message: "El código postal debe tener 5 dígitos"
-      }
-    },
-    country: {
-      required: "El país es requerido"
-    }
-  };
-
-  useEffect(() => {
-    if (address) {
-      Object.keys(address).forEach(key => {
-        setValue(key, address[key]);
-      });
-    }
-  }, [address, setValue]);
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="p-3">
-      <h5 className="mb-3 fw-bold text-primary">
-        {address ? "Editar Dirección" : "Agregar Nueva Dirección"}
-      </h5>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      {/* Street */}
+      <div className="mb-3">
+        <label className="form-label">Calle</label>
+        <input
+          className={`form-control ${errors.street ? 'is-invalid' : ''}`}
+          {...register('street', { 
+            required: 'La calle es requerida',
+            minLength: {
+              value: 5,
+              message: 'La calle debe tener al menos 5 caracteres'
+            }
+          })}
+          placeholder="Ej: Market Street"
+        />
+        {errors.street && <div className="invalid-feedback">{errors.street.message}</div>}
+      </div>
 
-      {error && (
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
-      )}
+      {/* Building Name */}
+      <div className="mb-3">
+        <label className="form-label">Nombre del edificio/Casa</label>
+        <input
+          className={`form-control ${errors.buildingName ? 'is-invalid' : ''}`}
+          {...register('buildingName', { 
+            required: 'El nombre del edificio es requerido'
+          })}
+          placeholder="Ej: Bay Apartments"
+        />
+        {errors.buildingName && <div className="invalid-feedback">{errors.buildingName.message}</div>}
+      </div>
 
-      <InputField
-        label="Calle"
-        id="street"
-        type="text"
-        register={register}
-        errors={errors}
-        validations={validations.street}
-        placeholder="Ej: Av. Reforma 123"
-      />
+      {/* City */}
+      <div className="mb-3">
+        <label className="form-label">Ciudad</label>
+        <input
+          className={`form-control ${errors.city ? 'is-invalid' : ''}`}
+          {...register('city', { 
+            required: 'La ciudad es requerida'
+          })}
+          placeholder="Ej: San Francisco"
+        />
+        {errors.city && <div className="invalid-feedback">{errors.city.message}</div>}
+      </div>
 
-      <InputField
-        label="Ciudad"
-        id="city"
-        type="text"
-        register={register}
-        errors={errors}
-        validations={validations.city}
-        placeholder="Ej: Ciudad de México"
-      />
+      {/* State */}
+      <div className="mb-3">
+        <label className="form-label">Estado</label>
+        <input
+          className={`form-control ${errors.state ? 'is-invalid' : ''}`}
+          {...register('state', { 
+            required: 'El estado es requerido'
+          })}
+          placeholder="Ej: California"
+        />
+        {errors.state && <div className="invalid-feedback">{errors.state.message}</div>}
+      </div>
 
-      <InputField
-        label="Estado"
-        id="state"
-        type="text"
-        register={register}
-        errors={errors}
-        validations={validations.state}
-        placeholder="Ej: CDMX"
-      />
+      {/* Pincode (ZIP Code) */}
+      <div className="mb-3">
+        <label className="form-label">Código Postal</label>
+        <input
+          className={`form-control ${errors.pincode ? 'is-invalid' : ''}`}
+          {...register('pincode', {
+            required: 'El código postal es requerido',
+            pattern: {
+              value: /^\d{5}$/,
+              message: 'El código postal debe tener 5 dígitos'
+            }
+          })}
+          placeholder="Ej: 94103"
+        />
+        {errors.pincode && <div className="invalid-feedback">{errors.pincode.message}</div>}
+      </div>
 
-      <InputField
-        label="Código Postal"
-        id="zipCode"
-        type="text"
-        register={register}
-        errors={errors}
-        validations={validations.zipCode}
-        placeholder="Ej: 12345"
-      />
+      {/* Country */}
+      <div className="mb-3">
+        <label className="form-label">País</label>
+        <input
+          className={`form-control ${errors.country ? 'is-invalid' : ''}`}
+          {...register('country', { 
+            required: 'El país es requerido'
+          })}
+          placeholder="Ej: USA"
+        />
+        {errors.country && <div className="invalid-feedback">{errors.country.message}</div>}
+      </div>
 
-      <InputField
-        label="País"
-        id="country"
-        type="text"
-        register={register}
-        errors={errors}
-        validations={validations.country}
-        placeholder="Ej: México"
-      />
-
-      <div className="d-grid gap-2 mt-4">
-        <button
-          type="submit"
+      {/* Submit Button */}
+      <div className="d-flex justify-content-end gap-2">
+        <button 
+          type="submit" 
+          className="btn btn-primary" 
           disabled={loading}
-          className="btn btn-primary btn-lg"
         >
           {loading ? (
             <>
@@ -150,7 +108,10 @@ const AddAddressForm = ({ setOpenAddressModal, address }) => {
               Guardando...
             </>
           ) : (
-            address ? "Actualizar Dirección" : "Guardar Dirección"
+            <>
+              <i className="bi bi-check2 me-2"></i>
+              Guardar dirección
+            </>
           )}
         </button>
       </div>

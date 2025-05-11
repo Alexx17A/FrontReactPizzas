@@ -5,7 +5,7 @@ import 'aos/dist/aos.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../../assets/css/StoreHome.css';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext'; // Importa useAuth
+import { useAuth } from '../../context/AuthContext'; 
 
 const StoreHome = () => {
   const [products, setProducts] = useState([]);
@@ -73,8 +73,7 @@ const StoreHome = () => {
         backgroundImage: 'url(https://images.unsplash.com/photo-1600891964599-f61ba0e24092)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        position: 'relative',
-        marginTop: '56px' // Para compensar el navbar fijo
+        position: 'relative'
       }}>
         <div className="bg-dark bg-opacity-50 py-5">
           <h1 className="display-4" data-aos="fade-down">¡Bienvenido a TazzPizza!</h1>

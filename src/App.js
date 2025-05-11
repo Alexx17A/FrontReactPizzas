@@ -44,6 +44,7 @@ const App = () => {
         <Route path="/tienda" element={<Layout withNavbarPadding={false}><StoreHome /></Layout>} />
         <Route path="/menu" element={<Layout withNavbarPadding={true} navbarSolid={true}><Menu /></Layout>} />
         <Route path="/about" element={<Layout withNavbarPadding={true} navbarSolid={true}><SobreNosotros /></Layout>} />
+        <Route path="/checkout" element={<Layout withNavbarPadding={true} navbarSolid={true}><Checkout /></Layout>} />
 
         {/* ============= PRODUCT DETAIL (SIN PADDING) ============= */}
         <Route path="/producto/:id" element={<Layout withNavbarPadding={false}><ProductDetail /></Layout>} />
@@ -63,18 +64,6 @@ const App = () => {
           <Route path="carts" element={<Carts />} />
           <Route path="pedidos" element={<AdminPedidos />} />
         </Route>
-
-
-        {/* ============= RUTA PROTEGIDA DEL CHECKOUT (SIN PADDING) ============= */}
-        <Route
-          path="/checkout"
-          element={
-            <Layout withNavbarPadding={false} navbarSolid={true}>
-              <Checkout />
-            </Layout>
-
-          }
-        />
 
         {/* ============= RUTAS PROTEGIDAS DE ADMINISTRADOR (SIN PADDING) ============= */}
 

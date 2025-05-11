@@ -8,7 +8,7 @@ const Layout = ({ children, withNavbarPadding = true, navbarSolid = false }) => 
       <NavbarGlobal solid={navbarSolid} />
       <main
         className="main-content"
-        style={withNavbarPadding ? { paddingTop: '56px' } : {}}
+        style={withNavbarPadding ? { paddingTop: '58px' } : {}}
       >
         {children}
       </main>

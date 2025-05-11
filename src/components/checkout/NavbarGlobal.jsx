@@ -1,7 +1,7 @@
 // src/components/NavbarGlobal.jsx
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext'; // Ajusta la ruta si es necesario
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext"; // Ajusta la ruta si es necesario
 
 const NavbarGlobal = ({ solid = false }) => {
   const { isLoggedIn, user, logout } = useAuth();
@@ -10,8 +10,8 @@ const NavbarGlobal = ({ solid = false }) => {
   useEffect(() => {
     if (!solid) {
       const onScroll = () => setScrolled(window.scrollY > 10);
-      window.addEventListener('scroll', onScroll);
-      return () => window.removeEventListener('scroll', onScroll);
+      window.addEventListener("scroll", onScroll);
+      return () => window.removeEventListener("scroll", onScroll);
     }
   }, [solid]);
 
@@ -20,11 +20,11 @@ const NavbarGlobal = ({ solid = false }) => {
   };
 
   // Decide la clase del navbar según la prop y el scroll
-  let navbarClass = 'navbar navbar-expand-lg fixed-top ';
+  let navbarClass = "navbar navbar-expand-lg fixed-top ";
   if (solid) {
-    navbarClass += 'navbar-scrolled'; // Siempre negro
+    navbarClass += "navbar-scrolled"; // Siempre negro
   } else {
-    navbarClass += scrolled ? 'navbar-scrolled' : 'navbar-transparent';
+    navbarClass += scrolled ? "navbar-scrolled" : "navbar-transparent";
   }
 
   return (
@@ -36,7 +36,12 @@ const NavbarGlobal = ({ solid = false }) => {
           <span className="logo-icon">🍕</span>
         </Link>
 
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarContent"
+        >
           <span className="navbar-toggler-icon"></span>
         </button>
 
@@ -52,19 +57,29 @@ const NavbarGlobal = ({ solid = false }) => {
                 <span className="nav-icon">👨‍🍳</span> Sobre Nosotros
               </Link>
             </li>
+            <li className="nav-item" data-aos="fade-down" data-aos-delay="200">
+              <Link className="nav-link" to="/checkout">
+                <span className="nav-icon"> 🛒 </span> Ir a pagar
+              </Link>
+            </li>
           </ul>
 
           <div className="d-flex align-items-center" data-aos="fade-left">
             {isLoggedIn ? (
               <>
-                <span className="text-white me-3">👋 Hola, {user?.username}</span>
+                <span className="text-white me-3">
+                  👋 Hola, {user?.username}
+                </span>
                 <button onClick={handleLogout} className="btn btn-warning">
                   Cerrar sesión
                 </button>
               </>
             ) : (
               <>
-                <Link to="/Registro" className="btn btn-outline-light me-2 register-btn">
+                <Link
+                  to="/Registro"
+                  className="btn btn-outline-light me-2 register-btn"
+                >
                   Registrarse
                 </Link>
                 <Link to="/login" className="btn btn-danger login-btn">
