@@ -14,6 +14,7 @@ import StoreHome from './pages/client/Index';
 import ProductDetail from './pages/client/ProductDetail';
 import Menu from './pages/client/Menu';
 import Checkout from './pages/checkout/Checkout';
+import PedidosUsuario from './pages/PedidosUsuario';
 
 // Auth imports
 import Login from './pages/Login';
@@ -39,12 +40,14 @@ const App = () => {
         <Route path="/auth" element={<AuthForm />} />
         <Route path="/Registro" element={<RegistroUsuarios />} />
 
+
         {/* ============= RUTAS PÚBLICAS DE LA TIENDA (CON LAYOUT Y PADDING) ============= */}
         <Route path="/" element={<Layout withNavbarPadding={true} ><StoreHome /></Layout>} />
         <Route path="/tienda" element={<Layout withNavbarPadding={false}><StoreHome /></Layout>} />
         <Route path="/menu" element={<Layout withNavbarPadding={true} navbarSolid={true}><Menu /></Layout>} />
         <Route path="/about" element={<Layout withNavbarPadding={true} navbarSolid={true}><SobreNosotros /></Layout>} />
         <Route path="/checkout" element={<Layout withNavbarPadding={true} navbarSolid={true}><Checkout /></Layout>} />
+        <Route path="/pedidosUsuario" element={<Layout withNavbarPadding={true} navbarSolid={true}><PedidosUsuario /></Layout>} />
 
         {/* ============= PRODUCT DETAIL (SIN PADDING) ============= */}
         <Route path="/producto/:id" element={<Layout withNavbarPadding={false}><ProductDetail /></Layout>} />
