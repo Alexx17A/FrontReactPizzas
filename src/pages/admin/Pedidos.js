@@ -38,12 +38,12 @@ const Pedidos = () => {
       setLoading(true);
       setError(null);
       
-      const response = await api.get(`/admin/orders?page=${page}`);
+      const response = await api.get(`/admin/orders`);
       const fetchedOrders = response.data.content || [];
       
       setOrders(fetchedOrders);
       setTotalPages(response.data.totalPages || 1);
-      
+      console.log('Fetched orders:', fetchedOrders);
       // Pre-fetch addresses
       fetchedOrders.forEach(order => {
         if (order.addressId && !addressCache[order.addressId]) {

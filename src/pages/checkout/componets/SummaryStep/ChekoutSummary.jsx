@@ -23,9 +23,11 @@ const handleProceedToPayment = async () => {
       toast.error('No se ha podido obtener el total de la orden');
       return;
     }
-
+console.log('Intentando crear el payment intent');
+      console.log('Total Price:', orderSummary.totalPrice);
     dispatch(setLoading(true));
     const clientSecret = await dispatch(
+      
       createPaymentIntent(orderSummary.totalPrice)
     ).unwrap();
 

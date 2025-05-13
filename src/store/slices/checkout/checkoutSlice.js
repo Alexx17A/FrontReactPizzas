@@ -1,4 +1,3 @@
-// src/store/slices/checkout/checkoutSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
 const defaultInitialState = {
@@ -12,16 +11,34 @@ const defaultInitialState = {
   clientSecret: null
 };
 
+// Solo recuperamos clientSecret y orderSummary de localStorage
 const loadInitialState = () => {
   try {
-    const persistedState = localStorage.getItem('checkout-state');
-    if (persistedState) {
-      return JSON.parse(persistedState);
+    // Intentar cargar el client secret
+    const persistedClientSecret = localStorage.getItem('client-secret');
+    let clientSecret = null;
+    if (persistedClientSecret) {
+      const parsed = JSON.parse(persistedClientSecret);
+      clientSecret = parsed.client_secret;
     }
+
+    // Intentar cargar el orderSummary (carrito)
+    const persistedOrderSummary = localStorage.getItem('order-summary');
+    let orderSummary = null;
+    if (persistedOrderSummary) {
+      orderSummary = JSON.parse(persistedOrderSummary);
+    }
+
+    // Retornar el estado inicial con los valores cargados
+    return { 
+      ...defaultInitialState,
+      clientSecret: clientSecret,
+      orderSummary: orderSummary
+    };
   } catch (error) {
-    console.error('Error loading checkout state:', error);
+    console.error('Error loading persisted state:', error);
+    return { ...defaultInitialState };
   }
-  return { ...defaultInitialState };
 };
 
 const initialState = loadInitialState();
@@ -33,29 +50,23 @@ const checkoutSlice = createSlice({
     // Navigation
     nextStep: (state) => {
       state.step += 1;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
     prevStep: (state) => {
       state.step -= 1;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
     setStep: (state, action) => {
       state.step = action.payload;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
 
     // Address Management
     setAddressList: (state, action) => {
       state.addressList = action.payload;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
     setSelectedAddress: (state, action) => {
       state.selectedAddress = action.payload;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
     addAddress: (state, action) => {
       state.addressList.push(action.payload);
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
     updateAddress: (state, action) => {
       const updatedAddress = action.payload;
@@ -65,7 +76,6 @@ const checkoutSlice = createSlice({
       if (index !== -1) {
         state.addressList[index] = updatedAddress;
       }
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
     removeAddress: (state, action) => {
       const addressId = action.payload;
@@ -75,7 +85,6 @@ const checkoutSlice = createSlice({
       if (state.selectedAddress?.addressId === addressId) {
         state.selectedAddress = null;
       }
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
 
     // Loading and Error States
@@ -92,43 +101,43 @@ const checkoutSlice = createSlice({
     // Payment Method
     setPaymentMethod: (state, action) => {
       state.paymentMethod = action.payload;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
 
     // Order Summary
     setOrderSummary: (state, action) => {
       state.orderSummary = action.payload;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
+      // Solo guardamos el orderSummary en localStorage
+      localStorage.setItem('order-summary', JSON.stringify(action.payload));
     },
 
     // Client Secret
     setClientSecret: (state, action) => {
       state.clientSecret = action.payload;
-      localStorage.setItem('client-secret', JSON.stringify({ client_secret: action.payload }));
-      localStorage.setItem('checkout-state', JSON.stringify(state));
+      // Solo guardamos el client secret en localStorage
+      if (action.payload) {
+        localStorage.setItem('client-secret', JSON.stringify({ client_secret: action.payload }));
+      } else {
+        localStorage.removeItem('client-secret');
+      }
     },
 
     // Clear States
     clearSelectedAddress: (state) => {
       state.selectedAddress = null;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
 
-    // Reset Checkout (usado en lugar de clearPersistedState)
+    // Reset Checkout
     resetCheckout: () => {
-      localStorage.removeItem('checkout-state');
+      // Eliminamos solo el client-secret y order-summary de localStorage
       localStorage.removeItem('client-secret');
-      return { ...defaultInitialState }; // SIEMPRE limpio
+      localStorage.removeItem('order-summary');
+      return { ...defaultInitialState }; // Siempre limpio
     },
 
-    // Persistir Estado
-    persistState: (state) => {
-      const stateToStore = {
-        ...state,
-        loading: false,
-        error: null
-      };
-      localStorage.setItem('checkout-state', JSON.stringify(stateToStore));
+    // Persistir solo los datos necesarios
+    persistState: () => {
+      // Este método no hace nada ahora porque los datos se guardan directamente
+      // en los métodos setClientSecret y setOrderSummary
     }
   }
 });
@@ -163,9 +172,11 @@ export const selectError = (state) => state.checkout.error;
 export const selectPaymentMethod = (state) => state.checkout.paymentMethod;
 export const selectOrderSummary = (state) => state.checkout.orderSummary;
 export const selectClientSecret = (state) => {
+  // Primero verificar si está en el estado de Redux
   const reduxSecret = state.checkout.clientSecret;
   if (reduxSecret) return reduxSecret;
 
+  // Si no está en Redux, intentar recuperarlo de localStorage
   try {
     const localStorageSecret = localStorage.getItem('client-secret');
     if (localStorageSecret) {

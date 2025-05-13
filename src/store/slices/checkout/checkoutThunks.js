@@ -10,7 +10,6 @@ import {
   addAddress as addAddressAction,
   updateAddress as updateAddressAction,
   removeAddress as removeAddressAction,
-  persistState // Importamos el nuevo action
 } from './checkoutSlice';
 import { toast } from 'react-toastify';
 
@@ -24,7 +23,7 @@ export const fetchCart = createAsyncThunk(
 
       const response = await api.get('/carts/users/cart');
       dispatch(setOrderSummary(response.data));
-      dispatch(persistState()); // Persistir el estado actualizado
+      // El setOrderSummary se encarga ahora de guardar en localStorage
       return response.data;
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Error al cargar el carrito';
@@ -36,6 +35,7 @@ export const fetchCart = createAsyncThunk(
     }
   }
 );
+
 // Generar intención de pago con Stripe
 export const createPaymentIntent = createAsyncThunk(
   'checkout/createPaymentIntent',
@@ -70,7 +70,7 @@ export const createPaymentIntent = createAsyncThunk(
 
       const { data } = await api.post('/order/stripe-client-secret', {
         amount: amountInCents,
-        currency: 'MXN'
+        currency: 'mxm'
       });
       console.log('Respuesta real del backend:', data);
       if (!data || !data.client_secret) {
@@ -79,9 +79,9 @@ export const createPaymentIntent = createAsyncThunk(
 
       console.log('Respuesta del servidor:', data.client_secret);
 
-      // Guardar el client_secret en el estado y localStorage
+      // Guardar el client_secret en el estado
+      // setClientSecret ahora maneja la persistencia en localStorage
       dispatch(setClientSecret(data.client_secret));
-      dispatch(persistState());
 
       return data.client_secret;
     } catch (error) {
@@ -133,7 +133,7 @@ export const confirmOrder = createAsyncThunk(
 
       // Limpiar el client secret después de una orden exitosa
       dispatch(setClientSecret(null));
-      dispatch(persistState());
+      // Ya no es necesario llamar a persistState()
 
       toast.success('Pago procesado exitosamente');
       return response.data;
@@ -147,6 +147,7 @@ export const confirmOrder = createAsyncThunk(
     }
   }
 );
+
 // GET /addresses
 export const fetchAddresses = createAsyncThunk(
   'checkout/fetchAddresses',
@@ -155,9 +156,9 @@ export const fetchAddresses = createAsyncThunk(
       dispatch(setLoading(true));
       dispatch(setError(null));
 
-      const response = await api.get('/addresses');
+      const response = await api.get('/users/addresses');
+      // Simplemente actualizar el estado sin persistir
       dispatch(setAddressList(response.data));
-      dispatch(persistState()); // Persistir el estado actualizado
       return response.data;
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Error al cargar las direcciones';
@@ -183,7 +184,7 @@ export const createAddress = createAsyncThunk(
 
       dispatch(addAddressAction(newAddress));
       dispatch(setSelectedAddress(newAddress));
-      dispatch(persistState()); // Persistir el estado actualizado
+      // Ya no persistimos las direcciones
 
       toast.success('Dirección agregada exitosamente');
       return newAddress;
@@ -215,8 +216,8 @@ export const updateAddress = createAsyncThunk(
       if (selectedAddress?.addressId === addressId) {
         dispatch(setSelectedAddress(updatedAddress));
       }
+      // Ya no persistimos las direcciones
 
-      dispatch(persistState()); // Persistir el estado actualizado
       toast.success('Dirección actualizada exitosamente');
       return updatedAddress;
     } catch (error) {
@@ -246,8 +247,8 @@ export const deleteAddress = createAsyncThunk(
       if (selectedAddress?.addressId === addressId) {
         dispatch(setSelectedAddress(null));
       }
+      // Ya no persistimos las direcciones
 
-      dispatch(persistState()); // Persistir el estado actualizado
       toast.success('Dirección eliminada exitosamente');
       return addressId;
     } catch (error) {
