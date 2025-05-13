@@ -14,6 +14,7 @@ import StoreHome from './pages/client/Index';
 import ProductDetail from './pages/client/ProductDetail';
 import Menu from './pages/client/Menu';
 import Checkout from './pages/checkout/Checkout';
+import PedidosUsuario from './pages/PedidosUsuario';
 
 // Auth imports
 import Login from './pages/Login';
@@ -37,6 +38,7 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/auth" element={<AuthForm />} />
         <Route path="/Registro" element={<RegistroUsuarios />} />
+
 
         {/* ============= RUTAS PROTEGIDAS DE LA TIENDA (CON LAYOUT Y PADDING) ============= */}
         <Route path="/" element={
@@ -71,6 +73,7 @@ const App = () => {
           </ProtectedRoute>
         } />
 
+  <Route path="/pedidosUsuario" element={<Layout withNavbarPadding={true} navbarSolid={true}><PedidosUsuario /></Layout>} />
         {/* ============= PRODUCT DETAIL (PROTEGIDO) ============= */}
         <Route path="/producto/:id" element={
           <ProtectedRoute requiredRole={['ROLE_USER', 'ROLE_ADMIN', 'ROLE_SELLER']}>

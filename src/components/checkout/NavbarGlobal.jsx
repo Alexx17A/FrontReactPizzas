@@ -62,6 +62,12 @@ const NavbarGlobal = ({ solid = false }) => {
                 <span className="nav-icon"> 🛒 </span> Ir a pagar
               </Link>
             </li>
+           
+            <li className="nav-item" data-aos="fade-down" data-aos-delay="200">
+              <Link className="nav-link" to="/pedidosUsuario">
+                <span className="nav-icon"> 🚚 </span> Mis Pedidos
+              </Link>
+            </li>
           </ul>
 
           <div className="d-flex align-items-center" data-aos="fade-left">
