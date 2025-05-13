@@ -69,6 +69,9 @@ export const AuthProvider = ({ children }) => {
       await api.post('/auth/signout', {});
       localStorage.removeItem('username');
       localStorage.removeItem('userRoles');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('jwt_token');
+      localStorage.removeItem('checkout-state');
       dispatch({ type: 'LOGOUT' });
       reduxDispatch(logoutAction());
       return { success: true };

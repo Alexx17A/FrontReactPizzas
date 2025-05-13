@@ -17,7 +17,7 @@ const RegistroUsuarios = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
-  
+
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -43,67 +43,67 @@ const RegistroUsuarios = () => {
   const validateForm = () => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
+
     if (!formData.nombre.trim()) newErrors.nombre = 'Nombre requerido';
     if (!emailRegex.test(formData.email)) newErrors.email = 'Email inválido';
     if (formData.password.length < 6) newErrors.password = 'Mínimo 6 caracteres';
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Las contraseñas no coinciden';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validateForm()) return;
-  
-  setIsSubmitting(true);
-  
-  try {
-    // 1. Registrar usuario
-    await api.post('/auth/signup', {
-      username: formData.nombre,
-      email: formData.email,
-      password: formData.password
-    });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-    // 2. Mostrar animación de éxito inmediatamente
-    setRegistrationSuccess(true);
-    
-    // 3. Esperar el tiempo mínimo de la animación (2 segundos)
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // 4. Intentar login automático
+    setIsSubmitting(true);
+
     try {
-      const loginResult = await login(formData.nombre, formData.password);
-      
-      // 5. Redirigir según rol
-      const redirectPath = loginResult.data.roles.includes('ROLE_ADMIN') 
-        ? '/admin' 
-        : '/tienda';
-      navigate(redirectPath);
-      
-    } catch (loginError) {
-      // 6. Si falla el login, redirigir igual
-      navigate('/login');
-    }
+      // 1. Registrar usuario
+      await api.post('/auth/signup', {
+        username: formData.nombre,
+        email: formData.email,
+        password: formData.password
+      });
 
-  } catch (error) {
-    console.error('Error al registrar:', error);
-    const errorMessage = error.response?.data?.message || 'Error al registrar. Intenta nuevamente.';
-    
-    if (errorMessage.includes('Username is already taken')) {
-      setErrors({ nombre: 'Este nombre de usuario ya está en uso' });
-    } else if (errorMessage.includes('Email is already in use')) {
-      setErrors({ email: 'Este correo electrónico ya está registrado' });
-    } else {
-      setErrors({ submit: errorMessage });
+      // 2. Mostrar animación de éxito inmediatamente
+      setRegistrationSuccess(true);
+
+      // 3. Esperar el tiempo mínimo de la animación (2 segundos)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // 4. Intentar login automático
+      try {
+        const loginResult = await login(formData.nombre, formData.password);
+
+        // 5. Redirigir según rol
+        const redirectPath = loginResult.data.roles.includes('ROLE_ADMIN')
+          ? '/admin'
+          : '/tienda';
+        navigate(redirectPath);
+
+      } catch (loginError) {
+        // 6. Si falla el login, redirigir igual
+        navigate('/login');
+      }
+
+    } catch (error) {
+      console.error('Error al registrar:', error);
+      const errorMessage = error.response?.data?.message || 'Error al registrar. Intenta nuevamente.';
+
+      if (errorMessage.includes('Username is already taken')) {
+        setErrors({ nombre: 'Este nombre de usuario ya está en uso' });
+      } else if (errorMessage.includes('Email is already in use')) {
+        setErrors({ email: 'Este correo electrónico ya está registrado' });
+      } else {
+        setErrors({ submit: errorMessage });
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   return (
     <div className="registro-wrapper">
@@ -114,7 +114,7 @@ const handleSubmit = async (e) => {
           </div>
           <h2 data-aos="fade-down" data-aos-delay="150">Crear Cuenta</h2>
           <p data-aos="fade-down" data-aos-delay="200">
-            Únete a la familia TazzPizza <br/>y recibe grandes Descuentos %
+            Únete a la familia TazzPizza <br />y recibe grandes Descuentos %
           </p>
         </div>
 
@@ -126,8 +126,7 @@ const handleSubmit = async (e) => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="registro-form">
-            {/* Campos del formulario igual que en el segundo componente */}
-            <div className={`input-group ${errors.nombre ? 'error' : ''}`} data-aos="fade-up" data-aos-delay="250">
+            <div className={`input-group ${errors.nombre ? 'error' : ''}`}>
               <input
                 type="text"
                 name="nombre"
@@ -139,7 +138,7 @@ const handleSubmit = async (e) => {
               {errors.nombre && <span className="error-msg">{errors.nombre}</span>}
             </div>
 
-            <div className={`input-group ${errors.email ? 'error' : ''}`} data-aos="fade-up" data-aos-delay="300">
+            <div className={`input-group ${errors.email ? 'error' : ''}`}>
               <input
                 type="email"
                 name="email"
@@ -151,7 +150,7 @@ const handleSubmit = async (e) => {
               {errors.email && <span className="error-msg">{errors.email}</span>}
             </div>
 
-            <div className={`input-group ${errors.password ? 'error' : ''}`} data-aos="fade-up" data-aos-delay="400">
+            <div className={`input-group ${errors.password ? 'error' : ''}`}>
               <input
                 type="password"
                 name="password"
@@ -163,7 +162,7 @@ const handleSubmit = async (e) => {
               {errors.password && <span className="error-msg">{errors.password}</span>}
             </div>
 
-            <div className={`input-group ${errors.confirmPassword ? 'error' : ''}`} data-aos="fade-up" data-aos-delay="450">
+            <div className={`input-group ${errors.confirmPassword ? 'error' : ''}`}>
               <input
                 type="password"
                 name="confirmPassword"
@@ -176,13 +175,13 @@ const handleSubmit = async (e) => {
             </div>
 
             {errors.submit && (
-              <div className="form-error" data-aos="fade-up">
+              <div className="form-error">
                 {errors.submit}
               </div>
             )}
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="submit-btn"
               disabled={isSubmitting}
               data-aos="fade-up"
