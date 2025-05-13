@@ -1,7 +1,6 @@
 // PaymentMethodStep.jsx
 import React from 'react';
 import './PaymentMethodStep.css';
-
 const PaymentMethodStep = ({ onSelectPaymentMethod, selectedMethod }) => {
   return (
     <div className="payment-method-container">
@@ -9,8 +8,8 @@ const PaymentMethodStep = ({ onSelectPaymentMethod, selectedMethod }) => {
       
       <div className="payment-methods">
         <div 
-          className={`payment-method-card ${selectedMethod === 'card' ? 'selected' : ''}`}
-          onClick={() => onSelectPaymentMethod('card')}
+          className={`payment-method-card ${selectedMethod === 'CARD' ? 'selected' : ''}`}
+          onClick={() => onSelectPaymentMethod('CARD')}
         >
           <div className="payment-method-icon">💳</div>
           <div className="payment-method-details">
@@ -18,13 +17,13 @@ const PaymentMethodStep = ({ onSelectPaymentMethod, selectedMethod }) => {
             <p>Paga de forma segura con tu tarjeta</p>
           </div>
           <div className="payment-method-check">
-            {selectedMethod === 'card' && '✓'}
+            {selectedMethod === 'CARD' && '✓'}
           </div>
         </div>
 
         <div 
-          className={`payment-method-card ${selectedMethod === 'cash' ? 'selected' : ''}`}
-          onClick={() => onSelectPaymentMethod('cash')}
+          className={`payment-method-card ${selectedMethod === 'CASH' ? 'selected' : ''}`}
+          onClick={() => onSelectPaymentMethod('CASH')}
         >
           <div className="payment-method-icon">💵</div>
           <div className="payment-method-details">
@@ -32,7 +31,7 @@ const PaymentMethodStep = ({ onSelectPaymentMethod, selectedMethod }) => {
             <p>Paga en efectivo al recibir tu pedido</p>
           </div>
           <div className="payment-method-check">
-            {selectedMethod === 'cash' && '✓'}
+            {selectedMethod === 'CASH' && '✓'}
           </div>
         </div>
       </div>

@@ -20,9 +20,11 @@ export const fetchCart = createAsyncThunk(
     try {
       dispatch(setLoading(true));
       dispatch(setError(null));
-
+      console.log('Iniciando fetchCart'); // 🐛
       const response = await api.get('/carts/users/cart');
       dispatch(setOrderSummary(response.data));
+            console.log('Datos del carrito:', response.data); // 🐛
+      console.log('Respuesta del carrito:', response.data);
       // El setOrderSummary se encarga ahora de guardar en localStorage
       return response.data;
     } catch (error) {
@@ -146,8 +148,29 @@ export const confirmOrder = createAsyncThunk(
       dispatch(setLoading(false));
     }
   }
-);
+);export const confirmCashOrder = createAsyncThunk(
+  'checkout/confirmCashOrder',
+  async ({ addressId }, { dispatch, rejectWithValue }) => {
+    try {
+      // Validación robusta del addressId
+      const parsedAddressId = Number(addressId);
+      if (isNaN(parsedAddressId) || parsedAddressId <= 0) {
+        throw new Error('ID de dirección inválido');
+      }
 
+      const response = await api.post('/order/users/payments/CASH', {
+        addressId: parsedAddressId
+      });
+
+      return response.data;
+    } catch (error) {
+      const errorData = error.response?.data || {
+        message: 'Error desconocido al procesar el pago'
+      };
+      return rejectWithValue(errorData);
+    }
+  }
+);
 // GET /addresses
 export const fetchAddresses = createAsyncThunk(
   'checkout/fetchAddresses',
