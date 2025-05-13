@@ -1,4 +1,3 @@
-// src/store/slices/checkout/checkoutSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
 const defaultInitialState = {
@@ -12,16 +11,31 @@ const defaultInitialState = {
   clientSecret: null
 };
 
+// Solo recuperamos clientSecret y orderSummary de localStorage
 const loadInitialState = () => {
   try {
-    const persistedState = localStorage.getItem('checkout-state');
-    if (persistedState) {
-      return JSON.parse(persistedState);
+    const persistedClientSecret = localStorage.getItem('client-secret');
+    let clientSecret = null;
+    if (persistedClientSecret) {
+      const parsed = JSON.parse(persistedClientSecret);
+      clientSecret = parsed.client_secret;
     }
+
+    const persistedOrderSummary = localStorage.getItem('order-summary');
+    let orderSummary = null;
+    if (persistedOrderSummary) {
+      orderSummary = JSON.parse(persistedOrderSummary);
+    }
+
+    return {
+      ...defaultInitialState,
+      clientSecret: clientSecret,
+      orderSummary: orderSummary
+    };
   } catch (error) {
-    console.error('Error loading checkout state:', error);
+    console.error('Error loading persisted state:', error);
+    return { ...defaultInitialState };
   }
-  return { ...defaultInitialState };
 };
 
 const initialState = loadInitialState();
@@ -33,29 +47,23 @@ const checkoutSlice = createSlice({
     // Navigation
     nextStep: (state) => {
       state.step += 1;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
     prevStep: (state) => {
       state.step -= 1;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
     setStep: (state, action) => {
       state.step = action.payload;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
 
     // Address Management
     setAddressList: (state, action) => {
       state.addressList = action.payload;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
     setSelectedAddress: (state, action) => {
       state.selectedAddress = action.payload;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
     addAddress: (state, action) => {
       state.addressList.push(action.payload);
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
     updateAddress: (state, action) => {
       const updatedAddress = action.payload;
@@ -65,7 +73,6 @@ const checkoutSlice = createSlice({
       if (index !== -1) {
         state.addressList[index] = updatedAddress;
       }
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
     removeAddress: (state, action) => {
       const addressId = action.payload;
@@ -75,7 +82,6 @@ const checkoutSlice = createSlice({
       if (state.selectedAddress?.addressId === addressId) {
         state.selectedAddress = null;
       }
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
 
     // Loading and Error States
@@ -89,46 +95,45 @@ const checkoutSlice = createSlice({
       state.error = null;
     },
 
-    // Payment Method
     setPaymentMethod: (state, action) => {
+      const validMethods = ['CARD', 'CASH'];
+      if (!validMethods.includes(action.payload)) {
+        console.warn('Método de pago inválido:', action.payload);
+        state.paymentMethod = null;
+        return;
+      }
       state.paymentMethod = action.payload;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
 
-    // Order Summary
     setOrderSummary: (state, action) => {
       state.orderSummary = action.payload;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
+      localStorage.setItem('order-summary', JSON.stringify(action.payload));
     },
 
-    // Client Secret
     setClientSecret: (state, action) => {
       state.clientSecret = action.payload;
-      localStorage.setItem('client-secret', JSON.stringify({ client_secret: action.payload }));
-      localStorage.setItem('checkout-state', JSON.stringify(state));
+      if (action.payload) {
+        localStorage.setItem('client-secret', JSON.stringify({ client_secret: action.payload }));
+      } else {
+        localStorage.removeItem('client-secret');
+      }
     },
 
-    // Clear States
     clearSelectedAddress: (state) => {
       state.selectedAddress = null;
-      localStorage.setItem('checkout-state', JSON.stringify(state));
     },
 
-    // Reset Checkout (usado en lugar de clearPersistedState)
     resetCheckout: () => {
-      localStorage.removeItem('checkout-state');
       localStorage.removeItem('client-secret');
-      return { ...defaultInitialState }; // SIEMPRE limpio
+      localStorage.removeItem('order-summary');
+      return {
+        ...defaultInitialState,
+        step: defaultInitialState.step
+      };
     },
 
-    // Persistir Estado
-    persistState: (state) => {
-      const stateToStore = {
-        ...state,
-        loading: false,
-        error: null
-      };
-      localStorage.setItem('checkout-state', JSON.stringify(stateToStore));
+    persistState: () => {
+      // Este método no hace nada ahora
     }
   }
 });
@@ -161,7 +166,30 @@ export const selectSelectedAddress = (state) => state.checkout.selectedAddress;
 export const selectLoading = (state) => state.checkout.loading;
 export const selectError = (state) => state.checkout.error;
 export const selectPaymentMethod = (state) => state.checkout.paymentMethod;
-export const selectOrderSummary = (state) => state.checkout.orderSummary;
+export const selectOrderSummary = (state) => {
+  const summary = state.checkout.orderSummary;
+  
+  if (!summary || !summary.products) {
+    return {
+      products: [],
+      totalPrice: 0
+    };
+  }
+
+  if (summary.totalPrice !== undefined) {
+    return summary;
+  }
+
+  const totalPrice = summary.products.reduce((total, product) => {
+    return total + (product.specialPrice * product.quantity);
+  }, 0);
+
+  return {
+    ...summary,
+    totalPrice
+  };
+};
+
 export const selectClientSecret = (state) => {
   const reduxSecret = state.checkout.clientSecret;
   if (reduxSecret) return reduxSecret;

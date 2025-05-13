@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import "../../assets/css/AuthForm.css";
+import { useNavigate } from "react-router-dom";
 const AuthForm = () => {
     const [isLogin, setIsLogin] = useState(true);
     const toggleForm = () => setIsLogin(!isLogin);
+const navigate = useNavigate();
 
     return (
         <div className="container d-flex justify-content-center align-items-center vh-100">
@@ -20,7 +22,10 @@ const AuthForm = () => {
                     </button>
                     <button
                         className={`btn ${!isLogin ? "btn-success" : "btn-outline-success"}`}
-                        onClick={() => setIsLogin(false)}
+                        onClick={() => {
+                            setIsLogin(false);
+                            navigate("/home");
+                        }}
                     >
                         Registrarse
                     </button>

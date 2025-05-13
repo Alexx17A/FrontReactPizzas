@@ -1,11 +1,12 @@
 // src/components/NavbarGlobal.jsx
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext"; // Ajusta la ruta si es necesario
-
+import { useAuth } from "../../context/AuthContext"; 
+import { NavLink, useNavigate } from 'react-router-dom'; 
 const NavbarGlobal = ({ solid = false }) => {
   const { isLoggedIn, user, logout } = useAuth();
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!solid) {
@@ -15,9 +16,11 @@ const NavbarGlobal = ({ solid = false }) => {
     }
   }, [solid]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
   };
+
 
   // Decide la clase del navbar según la prop y el scroll
   let navbarClass = "navbar navbar-expand-lg fixed-top ";

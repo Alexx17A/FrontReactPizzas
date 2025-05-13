@@ -29,7 +29,6 @@ import SobreNosotros from './pages/SobreNosotros';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/checkout/Layout';
 import { AuthProvider } from './context/AuthContext';
-
 const App = () => {
   return (
     <AuthProvider>
@@ -41,16 +40,55 @@ const App = () => {
         <Route path="/Registro" element={<RegistroUsuarios />} />
 
 
-        {/* ============= RUTAS PÚBLICAS DE LA TIENDA (CON LAYOUT Y PADDING) ============= */}
-        <Route path="/" element={<Layout withNavbarPadding={true} ><StoreHome /></Layout>} />
-        <Route path="/tienda" element={<Layout withNavbarPadding={false}><StoreHome /></Layout>} />
-        <Route path="/menu" element={<Layout withNavbarPadding={true} navbarSolid={true}><Menu /></Layout>} />
-        <Route path="/about" element={<Layout withNavbarPadding={true} navbarSolid={true}><SobreNosotros /></Layout>} />
-        <Route path="/checkout" element={<Layout withNavbarPadding={true} navbarSolid={true}><Checkout /></Layout>} />
-        <Route path="/pedidosUsuario" element={<Layout withNavbarPadding={true} navbarSolid={true}><PedidosUsuario /></Layout>} />
+        {/* ============= RUTAS PROTEGIDAS DE LA TIENDA (CON LAYOUT Y PADDING) ============= */}
+        <Route path="/" element={
+          <ProtectedRoute requiredRole={['ROLE_USER', 'ROLE_ADMIN', 'ROLE_SELLER']}>
+            <Layout withNavbarPadding={true}>
+              <StoreHome />
+            </Layout>
+          </ProtectedRoute>
+        } />
 
-        {/* ============= PRODUCT DETAIL (SIN PADDING) ============= */}
-        <Route path="/producto/:id" element={<Layout withNavbarPadding={false}><ProductDetail /></Layout>} />
+        <Route path="/tienda" element={
+          <ProtectedRoute requiredRole={['ROLE_USER', 'ROLE_ADMIN', 'ROLE_SELLER']}>
+            <Layout withNavbarPadding={false}>
+              <StoreHome />
+            </Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/menu" element={
+          <ProtectedRoute requiredRole={['ROLE_USER', 'ROLE_ADMIN', 'ROLE_SELLER']}>
+            <Layout withNavbarPadding={true} navbarSolid={true}>
+              <Menu />
+            </Layout>
+          </ProtectedRoute>
+        } />
+
+        <Route path="/checkout" element={
+          <ProtectedRoute requiredRole={['ROLE_USER', 'ROLE_ADMIN', 'ROLE_SELLER']}>
+            <Layout withNavbarPadding={true} navbarSolid={true}>
+              <Checkout />
+            </Layout>
+          </ProtectedRoute>
+        } />
+
+  <Route path="/pedidosUsuario" element={<Layout withNavbarPadding={true} navbarSolid={true}><PedidosUsuario /></Layout>} />
+        {/* ============= PRODUCT DETAIL (PROTEGIDO) ============= */}
+        <Route path="/producto/:id" element={
+          <ProtectedRoute requiredRole={['ROLE_USER', 'ROLE_ADMIN', 'ROLE_SELLER']}>
+            <Layout withNavbarPadding={false}>
+              <ProductDetail />
+            </Layout>
+          </ProtectedRoute>
+        } />
+
+        
+        <Route path="/about" element={
+          <Layout withNavbarPadding={true} navbarSolid={true}>
+            <SobreNosotros />
+          </Layout>
+        } />
 
         {/* Rutas Admin agrupadas */}
         <Route
@@ -68,11 +106,8 @@ const App = () => {
           <Route path="pedidos" element={<AdminPedidos />} />
         </Route>
 
-        {/* ============= RUTAS PROTEGIDAS DE ADMINISTRADOR (SIN PADDING) ============= */}
-
-
         {/* ============= RUTA DE FALLBACK ============= */}
-        <Route path="*" element={<Navigate to="/tienda" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} /> {/* Cambiado a /login */}
       </Routes>
     </AuthProvider>
   );

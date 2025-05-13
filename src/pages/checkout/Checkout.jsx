@@ -1,29 +1,28 @@
-// src/pages/checkout/Checkout.jsx
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { Elements } from "@stripe/react-stripe-js"; // Cambiar esta importación
-import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
 import {
   nextStep,
   prevStep,
   setSelectedAddress,
   setPaymentMethod,
   selectClientSecret,
-  selectSelectedAddress, // Cambiar esto
-  selectPaymentMethod, // Cambiar esto
+  selectSelectedAddress,
+  selectPaymentMethod,
   setLoading,
   setError,
-  resetCheckout, // Cambiar esto
+  resetCheckout,
 } from "../../store/slices/checkout/checkoutSlice";
 import {
   fetchAddresses,
   createAddress,
   updateAddress,
   deleteAddress,
-  createPaymentIntent, // Importa el thunk
-  confirmOrder, // Importa el thunk
-  fetchCart, // Importa el thunk
+  createPaymentIntent,
+  confirmOrder,
+  fetchCart,
+  confirmCashOrder,
 } from "../../store/slices/checkout/checkoutThunks";
 import AddressInfoModal from "./componets/AddressStep/AddressInfoModal";
 import AddressList from "./componets/AddressStep/AddressList";
@@ -32,16 +31,17 @@ import PaymentMethodStep from "./componets/PaymentMethodStep/PaymentMethodStep";
 import CheckoutSummary from "./componets/SummaryStep/ChekoutSummary";
 import StripePaymentForm from "./componets/ConfirmationStep/StripePaymentForm";
 import { stripePromise } from "../../config/stripe";
+import { useNavigate } from "react-router-dom";
+import CashPaymentProcessing from "./componets/ConfirmationStep/CashPaymentProcessing";
 
 const steps = ["Dirección", "Pago", "Resumen", "Confirmación"];
 
 const Checkout = () => {
-  //uso de los redux
   const dispatch = useDispatch();
   const { step, addressList, loading, error } = useSelector(
     (state) => state.checkout
   );
-
+  const navigate = useNavigate();
   const selectedAddress = useSelector(selectSelectedAddress);
   const paymentMethod = useSelector(selectPaymentMethod);
   const clientSecret = useSelector(selectClientSecret);
@@ -49,7 +49,7 @@ const Checkout = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
   const [stripeLoaded, setStripeLoaded] = useState(false);
-  //verificar stripe
+
   useEffect(() => {
     const verifyStripe = async () => {
       try {
@@ -72,7 +72,6 @@ const Checkout = () => {
     verifyStripe();
   }, []);
 
-  // Cargar direcciones del usuario
   useEffect(() => {
     const loadAddresses = async () => {
       try {
@@ -85,12 +84,11 @@ const Checkout = () => {
     loadAddresses();
   }, [dispatch]);
 
-  // Manejadores de direcciones
-  const handleAddAddress = async (addressData) => {
+  const handleAddAddress = async (address) => {
     try {
-      await dispatch(createAddress(addressData)).unwrap();
-      setShowModal(false);
+      await dispatch(createAddress(address)).unwrap();
       toast.success("Dirección agregada exitosamente");
+      setShowModal(false);
     } catch (error) {
       toast.error(error.message || "Error al agregar la dirección");
     }
@@ -146,37 +144,37 @@ const Checkout = () => {
       toast.error("Por favor selecciona un método de pago");
       return;
     }
-    // Simplemente avanzar al siguiente paso
     dispatch(nextStep());
   };
 
   const handleBack = () => {
     dispatch(prevStep());
   };
+
   const handlePaymentSuccess = async (paymentIntent) => {
     try {
       dispatch(setLoading(true));
       dispatch(setError(null));
-      // Llama al thunk con el objeto correcto
+
       await dispatch(
         confirmOrder({
           addressId: selectedAddress.addressId,
           paymentIntent,
         })
       ).unwrap();
-      toast.success("Pago realizado con éxito. ¡Gracias por tu compra!");
-      dispatch(nextStep()); // Avanza al paso de confirmación
-      dispatch(resetCheckout()); // Limpia todo el estado y localStorage
+
+      dispatch(nextStep());
+
+      setTimeout(() => {
+        dispatch(resetCheckout());
+      }, 5000);
     } catch (error) {
-      toast.error(
-        error.message ||
-          "Error al confirmar la orden. Por favor, intenta de nuevo."
-      );
+      toast.error(error.message || "Error al confirmar la orden");
     } finally {
       dispatch(setLoading(false));
     }
   };
-  // Vista cuando no hay direcciones
+
   const renderNoAddresses = () => (
     <div className="card border-0 shadow-sm">
       <div className="card-body text-center py-5">
@@ -200,7 +198,6 @@ const Checkout = () => {
     </div>
   );
 
-  // Renderizado condicional basado en el paso actual
   const renderStep = () => {
     switch (step) {
       case 0:
@@ -282,6 +279,30 @@ const Checkout = () => {
           </div>
         );
       case 3:
+        if (paymentMethod === "CASH") {
+          return (
+            <div className="card border-0 shadow-sm">
+              <div className="card-body">
+                <h3 className="card-title mb-4">
+                  Confirmación de Pago en Efectivo
+                </h3>
+                {selectedAddress?.addressId ? (
+                  <CashPaymentProcessing
+                    addressId={selectedAddress.addressId}
+                    onError={(error) => {
+                      toast.error(error);
+                      dispatch(prevStep());
+                    }}
+                  />
+                ) : (
+                  <div className="alert alert-danger">
+                    No se ha seleccionado una dirección válida
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        }
         return (
           <div className="card border-0 shadow-sm">
             <div className="card-body">
@@ -303,20 +324,28 @@ const Checkout = () => {
           </div>
         );
       case 4:
-       return (
+        return (
           <div className="card border-0 shadow-sm">
-            <div className="card-body text-center">
+            <div className="card-body text-center py-5">
               <div className="mb-4">
                 <i
                   className="bi bi-check-circle-fill text-success"
                   style={{ fontSize: "4rem" }}
                 ></i>
               </div>
-              <h3 className="card-title">¡Pedido confirmado!</h3>
-              <p className="text-muted">
-                Gracias por tu compra. Recibirás un correo con los detalles de
-                tu pedido.
+              <h3 className="card-title mb-3">¡Pedido confirmado!</h3>
+              <p className="text-muted mb-4">
+                Recibirás un correo con los detalles de tu pedido.
               </p>
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  dispatch(resetCheckout());
+                  navigate("/pedidosUsuario");
+                }}
+              >
+                Ver mis pedidos
+              </button>
             </div>
           </div>
         );
@@ -327,7 +356,6 @@ const Checkout = () => {
 
   return (
     <div className="container py-5">
-      {/* Progress Steps */}
       <div className="row mb-4">
         <div className="col">
           <div className="d-flex justify-content-between position-relative align-items-center">
@@ -370,7 +398,6 @@ const Checkout = () => {
         </div>
       </div>
 
-      {/* Content */}
       {loading ? (
         <div className="text-center py-5">
           <div className="spinner-border text-primary" role="status">
@@ -385,7 +412,6 @@ const Checkout = () => {
         renderStep()
       )}
 
-      {/* Modal */}
       <AddressInfoModal
         open={showModal}
         onClose={() => {

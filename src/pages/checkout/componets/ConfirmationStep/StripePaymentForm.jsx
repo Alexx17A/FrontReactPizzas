@@ -1,11 +1,11 @@
-import React from 'react';
+import React from "react";
 import {
   PaymentElement,
   useStripe,
-  useElements
-} from '@stripe/react-stripe-js';
-import { useSelector } from 'react-redux';
-import { selectSelectedAddress } from '../../../../store/slices/checkout/checkoutSlice';
+  useElements,
+} from "@stripe/react-stripe-js";
+import { useSelector } from "react-redux";
+import { selectSelectedAddress } from "../../../../store/slices/checkout/checkoutSlice";
 
 const StripePaymentForm = ({ onSuccess }) => {
   const stripe = useStripe();
@@ -28,16 +28,21 @@ const StripePaymentForm = ({ onSuccess }) => {
         confirmParams: {
           return_url: `${window.location.origin}/checkout`,
         },
-        redirect: 'if_required',
+        redirect: "if_required",
       });
 
       if (error) {
         setPaymentError(error.message);
-      } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+      } // Modificar la línea donde llamas a onSuccess
+      else if (paymentIntent && paymentIntent.status === "succeeded") {
         onSuccess(paymentIntent);
+        // Opcional: Forzar actualización del estado
+        window.dispatchEvent(new Event("paymentSuccess"));
       }
     } catch (error) {
-      setPaymentError('Ocurrió un error al procesar el pago. Por favor, intenta de nuevo.');
+      setPaymentError(
+        "Ocurrió un error al procesar el pago. Por favor, intenta de nuevo."
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -63,15 +68,18 @@ const StripePaymentForm = ({ onSuccess }) => {
             <div className="mb-3">
               <label className="form-label">Dirección seleccionada</label>
               <div>
-                <strong>{selectedAddress?.street}</strong><br />
-                {selectedAddress?.city}, {selectedAddress?.state}<br />
+                <strong>{selectedAddress?.street}</strong>
+                <br />
+                {selectedAddress?.city}, {selectedAddress?.state}
+                <br />
                 {selectedAddress?.country} - CP: {selectedAddress?.pincode}
               </div>
               <small className="text-muted">
-                Los datos de facturación (nombre, email, teléfono, dirección) se pueden editar abajo.
+                Los datos de facturación (nombre, email, teléfono, dirección) se
+                pueden editar abajo.
               </small>
             </div>
-            <PaymentElement options={{ layout: 'tabs' }} />
+            <PaymentElement options={{ layout: "tabs" }} />
           </div>
 
           {paymentError && (
@@ -88,11 +96,15 @@ const StripePaymentForm = ({ onSuccess }) => {
             >
               {isProcessing ? (
                 <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   Procesando...
                 </>
               ) : (
-                'Pagar ahora'
+                "Pagar ahora"
               )}
             </button>
           </div>
