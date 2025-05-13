@@ -1,4 +1,3 @@
-// src/pages/admin/Carts.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 import api from '../../services/api';
 import AOS from 'aos';

@@ -1,4 +1,3 @@
-// src/pages/admin/Categories.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 import api from '../../services/api';
 import EditCategoryModal from '../../components/modals/EditCategoryModal';

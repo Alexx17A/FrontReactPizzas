@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Admin imports
 import AdminHome from './pages/admin/Home';
-import AdminPedidos from './pages/admin/Pedidos';
+import AdminPedidos from './pages/admin/Orders';
 import AdminProducts from './pages/admin/Products';
 import Categories from './pages/admin/Categories';
 import Carts from './pages/admin/Carts';

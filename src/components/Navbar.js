@@ -54,14 +54,6 @@ const Sidebar = () => {
               Categories
             </NavLink>
           </li>
-          <li className="nav-item">
-            <NavLink
-              to="/admin/carts"
-              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-            >
-              Carts
-            </NavLink>
-          </li>
         </ul>
       </div>
       <div className="px-3 pb-4">

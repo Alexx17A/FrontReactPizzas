@@ -1,16 +1,18 @@
 import React from 'react';
 import MenuItemCard from './MenuItemCard';
-import CartContainer from './Cart.js'; // 
+import CartContainer from './Cart.js';
 
 const MenuUI = ({
   username,
+  categories,
   category,
   searchTerm,
+  setSearchTerm,
+  handleSearchSubmit,
   products,
   totalPages,
   page,
   handleCategoryChange,
-  handleSearchChange,
   setPage,
   onAddToCart,
   isLoading
@@ -22,10 +24,10 @@ const MenuUI = ({
 
   return (
     <div className="container py-4">
-      {/* Encabezado con botón del carrito */}
+      {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2>Menú</h2>
-        <button 
+        <button
           className="btn btn-primary d-flex align-items-center gap-2"
           onClick={handleCartClick}
         >
@@ -33,35 +35,40 @@ const MenuUI = ({
         </button>
       </div>
 
-      {/* Filtros */}
-      <div className="row mb-4">
+      {/* Filters */}
+      <div className="row mb-4 align-items-end">
         <div className="col-md-6">
-          <select 
-            className="form-select"
-            value={category}
-            onChange={handleCategoryChange}
-          >
-            <option value="all">Todos los productos</option>
-            <option value="pizza">Pizzas</option>
-            <option value="hotdog">Hot Dogs</option>
-            <option value="hamburguesa">Hamburguesas</option>
-            <option value="papas">Papas</option>
-            <option value="bebidas">Bebidas</option>
-            <option value="tacos">Tacos</option>
-          </select>
+          <div className="form-group">
+            <select
+              className="form-select"
+              value={category}
+              onChange={handleCategoryChange}
+            >
+              <option value="all">Todos los productos</option>
+              {categories.map(cat => (
+                <option key={cat.categoryId} value={cat.categoryId}>
+                  {cat.categoryName}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         <div className="col-md-6">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Buscar productos..."
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
+          <div className="form-group">
+            <div className="d-flex">
+              <input
+                type="text"
+                className="form-control me-2"
+                placeholder="Buscar productos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Productos */}
+      {/* Products */}
       {isLoading ? (
         <div className="text-center py-5">
           <div className="spinner-border text-primary" role="status">
@@ -74,8 +81,8 @@ const MenuUI = ({
           <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {products.map(product => (
               <div className="col" key={product.productId}>
-                <MenuItemCard 
-                  product={product} 
+                <MenuItemCard
+                  product={product}
                   onAddToCart={onAddToCart}
                 />
               </div>
@@ -92,14 +99,14 @@ const MenuUI = ({
             <nav className="mt-4">
               <ul className="pagination justify-content-center">
                 {Array.from({ length: totalPages }, (_, i) => (
-                  <li 
-                    key={i} 
+                  <li
+                    key={i}
                     className={`page-item ${page === i ? 'active' : ''}`}
                   >
-                    <button 
-                      className="page-link" 
+                    <button
+                      className="page-link"
                       onClick={() => setPage(i)}
-                    > 
+                    >
                       {i + 1}
                     </button>
                   </li>
@@ -110,7 +117,7 @@ const MenuUI = ({
         </>
       )}
 
-      {/* Carrito modal */}
+      {/* Cart */}
       <CartContainer />
     </div>
   );

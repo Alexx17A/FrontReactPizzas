@@ -22,15 +22,15 @@ const EditProductModal = ({ show, product, categories, onClose, onChange, onSubm
             </div>
             <div className="mb-2">
               <label>Cantidad</label>
-              <input className="form-control" type="number" name="quantity" value={product.quantity} onChange={onChange} />
+              <input className="form-control" type="number" name="quantity" value={product.quantity} onChange={onChange} min="0" max="100"/>
             </div>
             <div className="mb-2">
               <label>Precio</label>
-              <input className="form-control" type="number" name="price" value={product.price} onChange={onChange} />
+              <input className="form-control" type="number" name="price" value={product.price} onChange={onChange} min="0" />
             </div>
             <div className="mb-2">
               <label>Descuento</label>
-              <input className="form-control" type="number" name="discount" value={product.discount} onChange={onChange} />
+              <input className="form-control" type="number" name="discount" value={product.discount} onChange={onChange} min="0"/>
             </div>
             <div className="mb-2">
               <label>Categoría</label>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../services/api';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -53,7 +53,7 @@ const StoreHome = () => {
   useEffect(() => {
     AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
 
-    axios.get('http://localhost:8000/api/products')
+    api.get('/public/products')
       .then(res => {
         if (Array.isArray(res.data) && res.data.length > 0) {
           setProducts(res.data);

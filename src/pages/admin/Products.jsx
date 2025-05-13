@@ -1,4 +1,3 @@
-// src/pages/admin/Products.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 import api from '../../services/api';
 import EditProductModal from '../../components/modals/EditProductModal';
@@ -28,6 +27,10 @@ const Products = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [feedback, setFeedback] = useState({ show: false, message: '', type: 'success' });
+
+  //Estados de imagen
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [currentProductId, setCurrentProductId] = useState(null);
 
   // Estado para nuevo producto
   const [newProduct, setNewProduct] = useState({
@@ -63,8 +66,8 @@ const Products = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      const url = searchQuery.trim() !== '' 
+
+      const url = searchQuery.trim() !== ''
         ? `/public/products/keyword/${encodeURIComponent(searchQuery.trim())}?page=${page}`
         : selectedCategory
           ? `/public/categories/${selectedCategory}/products?pageNumber=${page}`
@@ -72,7 +75,7 @@ const Products = () => {
 
       const response = await api.get(url);
       const fetchedProducts = response.data.content || [];
-      
+
       setProducts(fetchedProducts);
       setFilteredProducts(fetchedProducts);
       setTotalPages(response.data.totalPages || 1);
@@ -92,13 +95,42 @@ const Products = () => {
     if (searchTerm === '') {
       setFilteredProducts(products);
     } else {
-      const filtered = products.filter(product => 
+      const filtered = products.filter(product =>
         product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (product.description && product.description.toLowerCase().includes(searchTerm.toLowerCase()))
       );
       setFilteredProducts(filtered);
     }
   }, [searchTerm, products]);
+
+  const handleImageUpload = async (productId, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setCurrentProductId(productId);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      await api.put(`/products/${productId}/image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      fetchProducts();
+      showFeedback('Imagen subida correctamente.');
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      showFeedback('Error al subir la imagen.', 'error');
+    } finally {
+      setUploadingImage(false);
+      setCurrentProductId(null);
+      e.target.value = ''; // Resetear el input file
+    }
+  };
 
   // Manejadores de eventos
   const handleEdit = (product) => {
@@ -201,8 +233,8 @@ const Products = () => {
             ))}
           </select>
         </div>
-        <button 
-          className="btn btn-success" 
+        <button
+          className="btn btn-success"
           onClick={() => setShowAddModal(true)}
         >
           Agregar Producto
@@ -229,34 +261,50 @@ const Products = () => {
                 <tr key={product.productId}>
                   <td>{product.productId}</td>
                   <td>{product.productName}</td>
-                  <td>{product.description}</td>
+                  <td className="table-description-cell">
+                    {product.description}
+                  </td>
                   <td>{product.quantity}</td>
                   <td>${parseFloat(product.price).toFixed(2)}</td>
                   <td>{product.discount}%</td>
                   <td>${parseFloat(product.specialPrice).toFixed(2)}</td>
                   <td>
-                    <button 
-                      className="btn btn-warning btn-sm me-2" 
+                    <button
+                      className="btn btn-warning btn-sm me-2"
                       onClick={() => handleEdit(product)}
                     >
                       Editar
                     </button>
-                    <button 
-                      className="btn btn-danger btn-sm" 
+                    <button
+                      className="btn btn-danger btn-sm me-2"
                       onClick={() => handleDelete(product.productId)}
                     >
                       Eliminar
                     </button>
+                    <label className="btn btn-primary btn-sm" style={{ cursor: 'pointer' }}>
+                      {uploadingImage && currentProductId === product.productId ? (
+                        'Subiendo...'
+                      ) : (
+                        'Subir Imagen'
+                      )}
+                      <input
+                        type="file"
+                        style={{ display: 'none' }}
+                        onChange={(e) => handleImageUpload(product.productId, e)}
+                        accept="image/*"
+                        disabled={uploadingImage}
+                      />
+                    </label>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
                 <td colSpan="8" className="text-center text-muted">
-                  {searchTerm 
-                    ? "No se encontraron productos." 
-                    : selectedCategory 
-                      ? "No hay productos en esta categoría." 
+                  {searchTerm
+                    ? "No se encontraron productos."
+                    : selectedCategory
+                      ? "No hay productos en esta categoría."
                       : "No hay productos registrados."}
                 </td>
               </tr>
@@ -270,8 +318,8 @@ const Products = () => {
           <nav>
             <ul className="pagination">
               <li className={`page-item ${page === 0 ? 'disabled' : ''}`}>
-                <button 
-                  className="page-link" 
+                <button
+                  className="page-link"
                   onClick={() => setPage(prev => Math.max(prev - 1, 0))}
                 >
                   Anterior
@@ -279,8 +327,8 @@ const Products = () => {
               </li>
               {[...Array(totalPages)].map((_, i) => (
                 <li key={i} className={`page-item ${i === page ? 'active' : ''}`}>
-                  <button 
-                    className="page-link" 
+                  <button
+                    className="page-link"
                     onClick={() => setPage(i)}
                   >
                     {i + 1}
@@ -288,8 +336,8 @@ const Products = () => {
                 </li>
               ))}
               <li className={`page-item ${page === totalPages - 1 ? 'disabled' : ''}`}>
-                <button 
-                  className="page-link" 
+                <button
+                  className="page-link"
                   onClick={() => setPage(prev => Math.min(prev + 1, totalPages - 1))}
                 >
                   Siguiente
